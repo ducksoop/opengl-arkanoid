@@ -20,12 +20,21 @@ add_subdirectory(externals/glfw)
 
 # end
 # ------------------------
+
 # GLEW build configuration
 
 add_subdirectory(externals/glew)
 include_directories(externals/glew/include)
 add_library(glew STATIC externals/glew/src/glew.c)
 add_definitions(-DGLEW_STATIC)
+
+# end
+
+# ------------------------
+# Header-only libraries
+
+include_directories(externals/glm)
+include_directories(externals/stb)
 
 # end
 
