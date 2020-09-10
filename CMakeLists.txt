@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(breakout)
+project(Arkanoid)
 
 find_package(OpenGL REQUIRED)
 
@@ -26,6 +26,6 @@ add_definitions(-DGLEW_STATIC)
 
 # end
 
-add_executable(breakout ${SOURCES})
+add_executable(Arkanoid ${SOURCES})
 
-target_link_libraries(breakout glfw glew ${OPENGL_LIBRARY})
+target_link_libraries(Arkanoid glfw glew ${OPENGL_LIBRARY})
