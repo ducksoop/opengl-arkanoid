@@ -6,11 +6,13 @@
 #include "ShaderProgram.h"
 #include "Shader.h"
 #include "ShaderType.h"
+#include "FileManager.h"
 
 #include <iostream>
 #include <cstdlib>
 
 WindowManager& windowManager = WindowManager::Instance();
+FileManager& fileManager = FileManager::Instance();
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -45,23 +47,9 @@ int main(int argc, char* argv[])
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	// Preparing shaders
-	const GLchar* vertexShaderSource =
-		"#version 330 core\n"
-		"layout (location = 0) in vec3 position;\n"
-		"void main() {\n"
-		"gl_Position = vec4(position.x, position.y, position.z, 1.f);\n"
-		"}\0";
-	const GLchar* fragmentShaderSource =
-		"#version 330 core\n"
-		"out vec4 color;\n"
-		"void main() {\n"
-		"color = vec4(0.f, 0.75f, 1.f, 1.f);\n"
-		"}\n\0";
-
 	ShaderProgram shader(
-		Shader(ShaderType::Vertex, vertexShaderSource),
-		Shader(ShaderType::Fragment, fragmentShaderSource)
+		Shader(ShaderType::Vertex, fileManager.ReadAsText("../res/shaders/basic/shader.vert")),
+		Shader(ShaderType::Fragment, fileManager.ReadAsText("../res/shaders/basic/shader.frag"))
 	);
 
 	while (!window->IsClosing())

@@ -5,11 +5,12 @@
 
 #include <iostream>
 
-Shader::Shader(ShaderType type, const GLchar* source)
+Shader::Shader(ShaderType type, const std::string& source)
 {
 	m_ID = glCreateShader(type);
-
-	glShaderSource(m_ID, 1, &source, nullptr);
+	
+	const GLchar* shaderSource = source.c_str();
+	glShaderSource(m_ID, 1, &shaderSource, nullptr);
 	glCompileShader(m_ID);
 
 	CheckCompilationStatus();
