@@ -9,7 +9,7 @@
 class Shader
 {
 public:
-	Shader(ShaderType type, const std::string& source);
+	Shader(ShaderType type, const std::string& path);
 	~Shader();
 
 	GLuint GetID() const;

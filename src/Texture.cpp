@@ -22,6 +22,11 @@ Texture::Texture(GLuint w, GLuint h, unsigned char* image, GLuint format)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
+void Texture::Destroy()
+{
+	glDeleteTextures(1, &m_ID);
+}
+
 Texture::~Texture()
 {
 	glDeleteTextures(1, &m_ID);

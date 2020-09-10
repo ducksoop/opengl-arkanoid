@@ -10,7 +10,6 @@
 class ShaderProgram
 {
 public:
-	ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
 	~ShaderProgram();
 
 	void Use();
@@ -28,8 +27,13 @@ public:
 	void SetUniform(const std::string& name, glm::mat4 value);
 	
 private:
+	ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
+
+	void Destroy();
 	void CheckLinkageStatus();
 	GLuint GetUniformLocation(const std::string& name);
 	
 	GLuint m_ID;
+
+	friend class ResourceManager;
 };

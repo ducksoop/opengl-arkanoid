@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <vector>
 
 ShaderProgram::ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader)
 {
@@ -15,6 +16,12 @@ ShaderProgram::ShaderProgram(const Shader& vertexShader, const Shader& fragmentS
 	glLinkProgram(m_ID);
 
 	CheckLinkageStatus();
+}
+
+void ShaderProgram::Destroy()
+{
+	End();
+	glDeleteProgram(m_ID);
 }
 
 ShaderProgram::~ShaderProgram()
@@ -90,11 +97,14 @@ void ShaderProgram::CheckLinkageStatus()
 
 	if (!success)
 	{
-		const int MAX_BUFFER_SIZE = 256;
-		GLchar infoLog[MAX_BUFFER_SIZE];
+		GLint LOG_LENGTH;
+		glGetShaderiv(m_ID, GL_INFO_LOG_LENGTH, &LOG_LENGTH);
 
-		glGetProgramInfoLog(m_ID, MAX_BUFFER_SIZE, nullptr, infoLog);
-		std::cerr << infoLog << std::endl;
+		std::vector<GLchar> errorLog(static_cast<GLuint>(LOG_LENGTH));
+
+		glGetShaderInfoLog(m_ID, LOG_LENGTH, nullptr, &errorLog[0]);
+		std::cerr << &errorLog[0] << std::endl;
+		throw std::runtime_error("Shader compilation failed");
 	}
 }
 

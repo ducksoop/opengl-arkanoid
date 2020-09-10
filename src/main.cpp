@@ -6,14 +6,14 @@
 #include "ShaderProgram.h"
 #include "Shader.h"
 #include "ShaderType.h"
-#include "FileManager.h"
 #include "Texture.h"
+#include "ResourceManager.h"
 
 #include <iostream>
 #include <cstdlib>
 
 WindowManager& windowManager = WindowManager::Instance();
-FileManager& fileManager = FileManager::Instance();
+ResourceManager& resourceManager = ResourceManager::Instance();
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -21,6 +21,8 @@ const int HEIGHT = 600;
 int main(int argc, char* argv[])
 {
 	windowManager.Initialize();
+	resourceManager.Initialize();
+	
 	auto window = windowManager.CreateWindow(WIDTH, HEIGHT, "Arkanoid");
 	
 	glewExperimental = GL_TRUE;
@@ -28,11 +30,11 @@ int main(int argc, char* argv[])
 
 	// Creating a triangle
 	GLfloat vertices[] = {
-		// Positions			// Texture coordinates
-		0.5f, 0.5f, 0.0f,		1.0f, 1.0f,		// Top right
-		0.5f, -0.5f, 0.0f,		1.0f, 0.0f,		// Bottom right
-		-0.5f, -0.5f, 0.0f,		0.0f, 0.0f,		// Bottom left
-		-0.5f, 0.5f, 0.0f,		0.0f, 1.0f		// Top left
+		// Positions	// Texture coordinates
+		0.5f, 0.5f,		1.0f, 1.0f,		// Top right
+		0.5f, -0.5f,	1.0f, 0.0f,		// Bottom right
+		-0.5f, -0.5f,	0.0f, 0.0f,		// Bottom left
+		-0.5f, 0.5f,	0.0f, 1.0f		// Top left
 	};
 
 	GLuint indices[] = {
@@ -54,32 +56,35 @@ int main(int argc, char* argv[])
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), static_cast<GLvoid*>(nullptr));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), static_cast<GLvoid*>(nullptr));
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), reinterpret_cast<GLvoid*>(3 * sizeof(GLfloat)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), reinterpret_cast<GLvoid*>(2 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	ShaderProgram shader(
-		Shader(ShaderType::Vertex, fileManager.ReadAsText("../res/shaders/basic/shader.vert")),
-		Shader(ShaderType::Fragment, fileManager.ReadAsText("../res/shaders/basic/shader.frag"))
-	);
+	auto shader = resourceManager.CreateShaderProgram("basic",
+		Shader(ShaderType::Vertex,
+			"../res/shaders/basic/shader.vert"),
+		Shader(ShaderType::Fragment,
+			"../res/shaders/basic/shader.frag"));
 
 	GLuint textureWidth = 512;
-    GLuint textureHeight = 512;
-    Texture woodenContainer(textureWidth,
-                            textureHeight,
-                            fileManager.ReadImage("../res/textures/wooden_container.jpg",
-                                                   textureWidth, textureHeight, 3),
-                            GL_RGB);
-    Texture awesomeFace(textureWidth,
-                        textureHeight,
-                        fileManager.ReadImage("../res/textures/awesome_face.png",
-                                              textureWidth, textureHeight, 4),
-                        GL_RGBA);
+	GLuint textureHeight = 512;
+	
+	auto woodenContainer = resourceManager.CreateTexture("woodenContainer",
+		"../res/textures/wooden_container.jpg",
+		textureWidth,
+		textureHeight);
+	auto awesomeFace = resourceManager.CreateTexture("awesomeFace",
+		"../res/textures/awesome_face.png",
+		textureWidth,
+		textureHeight,
+		4,
+		GL_RGBA);
+
 
 	while (!window->IsClosing())
 	{
@@ -88,12 +93,12 @@ int main(int argc, char* argv[])
 		glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		shader.Use();
+		shader->Use();
 
-		woodenContainer.Bind(0);
-		shader.SetUniform("texture1", 0);
-		awesomeFace.Bind(1);
-		shader.SetUniform("texture2", 1);
+		woodenContainer->Bind(0);
+		shader->SetUniform("texture1", 0);
+		awesomeFace->Bind(1);
+		shader->SetUniform("texture2", 1);
 		
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -106,6 +111,7 @@ int main(int argc, char* argv[])
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 
+	resourceManager.Close();
 	windowManager.Close();
 
 	return EXIT_SUCCESS;
