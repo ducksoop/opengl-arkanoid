@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "ShaderType.h"
 #include "FileManager.h"
+#include "Texture.h"
 
 #include <iostream>
 #include <cstdlib>
@@ -27,22 +28,37 @@ int main(int argc, char* argv[])
 
 	// Creating a triangle
 	GLfloat vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.0f, 0.5f, 0.0f
+		// Positions			// Texture coordinates
+		0.5f, 0.5f, 0.0f,		1.0f, 1.0f,		// Top right
+		0.5f, -0.5f, 0.0f,		1.0f, 0.0f,		// Bottom right
+		-0.5f, -0.5f, 0.0f,		0.0f, 0.0f,		// Bottom left
+		-0.5f, 0.5f, 0.0f,		0.0f, 1.0f		// Top left
+	};
+
+	GLuint indices[] = {
+		0, 1, 3,	// First triangle
+		1, 2, 3		// Second triangle
 	};
 	
 	// Buffer setup
-	GLuint VAO, VBO;
+	GLuint VAO, VBO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+	
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), static_cast<GLvoid*>(nullptr));
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), reinterpret_cast<GLvoid*>(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -52,6 +68,19 @@ int main(int argc, char* argv[])
 		Shader(ShaderType::Fragment, fileManager.ReadAsText("../res/shaders/basic/shader.frag"))
 	);
 
+	GLuint textureWidth = 512;
+    GLuint textureHeight = 512;
+    Texture woodenContainer(textureWidth,
+                            textureHeight,
+                            fileManager.ReadImage("../res/textures/wooden_container.jpg",
+                                                   textureWidth, textureHeight, 3),
+                            GL_RGB);
+    Texture awesomeFace(textureWidth,
+                        textureHeight,
+                        fileManager.ReadImage("../res/textures/awesome_face.png",
+                                              textureWidth, textureHeight, 4),
+                        GL_RGBA);
+
 	while (!window->IsClosing())
 	{
 		glfwPollEvents();
@@ -59,10 +88,15 @@ int main(int argc, char* argv[])
 		glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// Draw triangle
 		shader.Use();
+
+		woodenContainer.Bind(0);
+		shader.SetUniform("texture1", 0);
+		awesomeFace.Bind(1);
+		shader.SetUniform("texture2", 1);
+		
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 
 		window->SwapBuffers();
