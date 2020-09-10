@@ -17,6 +17,7 @@ private:
 	Window(int width, int height, const std::string& title, bool fullscreen, bool vsync);
 
 	void Destroy();
+	void SetupEventHandlers();
 
 	friend class WindowManager;
 	

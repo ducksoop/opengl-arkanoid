@@ -1,4 +1,5 @@
 #include "Window.h"
+#include "InputManager.h"
 
 #include <iostream>
 
@@ -35,6 +36,8 @@ Window::Window(int width, int height, const std::string& title, bool fullscreen,
 	int frameBufferHeight;
 	glfwGetFramebufferSize(m_window, &frameBufferWidth, &frameBufferHeight);
 	glViewport(0, 0, frameBufferWidth, frameBufferHeight);
+
+	SetupEventHandlers();
 }
 
 bool Window::IsClosing() const
@@ -60,4 +63,12 @@ void Window::SwapBuffers()
 void Window::Destroy()
 {
 	glfwDestroyWindow(m_window);
+}
+
+void Window::SetupEventHandlers()
+{
+	glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
+	{
+		InputManager::Instance().ProcessKeyEvent(key, scanCode, action, mods);
+	});
 }

@@ -8,12 +8,14 @@
 #include "ShaderType.h"
 #include "Texture.h"
 #include "ResourceManager.h"
+#include "InputManager.h"
 
 #include <iostream>
 #include <cstdlib>
 
 WindowManager& windowManager = WindowManager::Instance();
 ResourceManager& resourceManager = ResourceManager::Instance();
+InputManager& inputManager = InputManager::Instance();
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
@@ -24,6 +26,12 @@ int main(int argc, char* argv[])
 	resourceManager.Initialize();
 	
 	auto window = windowManager.CreateWindow(WIDTH, HEIGHT, "Arkanoid");
+
+	inputManager.AddKeyHandler("exit", [&window](int key, int scanCode, int action, int mods)
+	{
+		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+			window->SetShouldClose(true);
+	});
 	
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -88,7 +96,7 @@ int main(int argc, char* argv[])
 
 	while (!window->IsClosing())
 	{
-		glfwPollEvents();
+		inputManager.ProcessEvents();
 
 		glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -112,6 +120,7 @@ int main(int argc, char* argv[])
 	glDeleteBuffers(1, &VBO);
 
 	resourceManager.Close();
+	inputManager.Close();
 	windowManager.Close();
 
 	return EXIT_SUCCESS;

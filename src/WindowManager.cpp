@@ -12,9 +12,9 @@ void WindowManager::Initialize()
 {
 	// Setup error handling
 	glfwSetErrorCallback([](int errorCode, const char* description) -> void
-		{
-			std::cerr << description << std::endl;
-		});
+	{
+		throw std::runtime_error(description);
+	});
 
 	if (!glfwInit())
 		std::cerr << "Failed to initialize GLFW" << std::endl;
