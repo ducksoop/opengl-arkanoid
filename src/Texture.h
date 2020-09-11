@@ -7,12 +7,12 @@ class Texture
 public:
 	~Texture();
 
-	void Bind();
-	void Bind(GLuint uint);
-	void UnBind();
+	void Bind() const;
+	void Bind(GLuint uint) const;
+	void UnBind() const;
 	
 private:
-	Texture(GLuint w, GLuint h, unsigned char* image, GLuint format = GL_RGB);
+	Texture(GLuint w, GLuint h, unsigned char* image, GLuint format);
 
 	void Destroy();
 

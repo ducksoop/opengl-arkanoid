@@ -8,12 +8,6 @@
 #include <string>
 #include <iostream>
 
-ResourceManager& ResourceManager::Instance()
-{
-	static ResourceManager instance;
-	return instance;
-}
-
 void ResourceManager::Initialize()
 {
 }

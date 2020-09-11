@@ -6,12 +6,6 @@
 #include <iostream>
 #include <algorithm>
 
-InputManager& InputManager::Instance()
-{
-	static InputManager instance;
-	return instance;
-}
-
 void InputManager::Initialize()
 {
 }

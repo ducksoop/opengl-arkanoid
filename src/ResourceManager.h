@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Singleton.h"
 #include "ShaderProgram.h"
 #include "Shader.h"
 #include "Texture.h"
@@ -10,23 +11,9 @@
 #include <map>
 #include <string>
 
-class ResourceManager
+class ResourceManager : public Singleton<ResourceManager>
 {
 public:
-    static ResourceManager& Instance();
-	
-    // Copy constructor
-    ResourceManager(const ResourceManager&) = delete;
-	
-    // Move constructor
-    ResourceManager(const ResourceManager&&) = delete;
-	
-    // Copy assignment
-    ResourceManager& operator =(const ResourceManager&) = delete;
-	
-    // Move assignment
-    ResourceManager& operator =(const ResourceManager&&) = delete;
-
 	void Initialize();
 	void Close();
 
@@ -42,4 +29,6 @@ private:
 	
 	std::map<std::string, std::shared_ptr<ShaderProgram>> m_shaderPrograms;
 	std::map<std::string, std::shared_ptr<Texture>> m_textures;
+
+	friend Singleton;
 };

@@ -2,12 +2,6 @@
 
 #include <iostream>
 
-WindowManager& WindowManager::Instance()
-{
-	static WindowManager instance;
-	return instance;
-}
-
 void WindowManager::Initialize()
 {
 	// Setup error handling
@@ -15,6 +9,8 @@ void WindowManager::Initialize()
 	{
 		throw std::runtime_error(description);
 	});
+
+	std::cout << glfwGetVersionString() << std::endl;
 
 	if (!glfwInit())
 		std::cerr << "Failed to initialize GLFW" << std::endl;

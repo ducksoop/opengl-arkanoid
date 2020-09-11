@@ -26,8 +26,7 @@ void ShaderProgram::Destroy()
 
 ShaderProgram::~ShaderProgram()
 {
-	End();
-	glDeleteProgram(m_ID);
+	
 }
 
 void ShaderProgram::Use()

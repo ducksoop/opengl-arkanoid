@@ -60,6 +60,16 @@ void Window::SwapBuffers()
 	glfwSwapBuffers(m_window);
 }
 
+int Window::GetWidth() const
+{
+	return m_width;
+}
+
+int Window::GetHeight() const
+{
+	return m_height;
+}
+
 void Window::Destroy()
 {
 	glfwDestroyWindow(m_window);

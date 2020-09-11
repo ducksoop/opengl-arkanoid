@@ -7,12 +7,6 @@
 #include <fstream>
 #include <sstream>
 
-FileManager& FileManager::Instance()
-{
-	static FileManager instance;
-	return instance;
-}
-
 std::string FileManager::ReadAsText(const std::string& path) const
 {
 	std::string content;

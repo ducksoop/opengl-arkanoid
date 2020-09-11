@@ -20,6 +20,10 @@ Texture::Texture(GLuint w, GLuint h, unsigned char* image, GLuint format)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	UnBind();
+
+	stbi_image_free(image);
 }
 
 void Texture::Destroy()
@@ -29,21 +33,20 @@ void Texture::Destroy()
 
 Texture::~Texture()
 {
-	glDeleteTextures(1, &m_ID);
 }
 
-void Texture::Bind()
+void Texture::Bind() const
 {
 	glBindTexture(GL_TEXTURE_2D, m_ID);
 }
 
-void Texture::Bind(GLuint uint)
+void Texture::Bind(GLuint uint) const
 {
 	glActiveTexture(GL_TEXTURE0 + uint);
 	Bind();
 }
 
-void Texture::UnBind()
+void Texture::UnBind() const
 {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
