@@ -19,7 +19,7 @@ public:
 	                  const glm::vec2& position,
 	                  const glm::vec2& size = glm::vec2(10, 10),
 	                  const glm::vec3& color = glm::vec3(1.0f),
-	                  GLfloat rotate = 0.0f);
+	                  GLfloat rotate = 0.0f) const;
 	
 private:
 	SpriteRenderer();
