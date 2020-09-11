@@ -5,10 +5,11 @@
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
+const bool FULLSCREEN_ON = false;
 
 int main(int argc, char* argv[])
 {
-	Game game(WIDTH, HEIGHT);
+	Game game(WIDTH, HEIGHT, FULLSCREEN_ON);
 
 	GLfloat delta;
 	GLfloat lastFrame = static_cast<GLfloat>(glfwGetTime());

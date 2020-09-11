@@ -8,13 +8,15 @@
 #include "InputManager.h"
 #include "WindowManager.h"
 #include "Window.h"
+#include "Level.h"
 
 #include <memory>
+#include <vector>
 
 class Game
 {
 public:
-	Game(int w, int h);
+	Game(int w, int h, bool isFullscreen);
 	~Game();
 
 	void HandleInput(GLfloat dt);
@@ -24,12 +26,14 @@ public:
 	bool IsExiting();
 	
 private:
-	void InitializeWindow(int w, int h);
+	void InitializeWindow(int w, int h, bool isFullscreen);
 	void InitializeOpenGL();
 	void InitializeResources();
 	
 	GameState m_gameState;
 	std::shared_ptr<Window> m_window;
+	std::vector<std::shared_ptr<Level>> m_levels;
+	int m_currentLevel;
 
 	WindowManager& m_windowManager = WindowManager::Instance();
 	InputManager& m_inputManager = InputManager::Instance();

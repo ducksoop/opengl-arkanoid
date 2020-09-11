@@ -13,15 +13,14 @@
 #include <iostream>
 #include <utility>
 
-Game::Game(int w, int h)
+Game::Game(int w, int h, bool isFullscreen)
 	: m_gameState(GameState::GameActive)
-	, m_window()
 {
 	m_windowManager.Initialize();
 	m_inputManager.Initialize();
 	m_resourceManager.Initialize();
 	
-	InitializeWindow(w, h);
+	InitializeWindow(w, h, isFullscreen);
 	InitializeOpenGL();
 	InitializeResources();
 }
@@ -35,7 +34,7 @@ Game::~Game()
 
 void Game::HandleInput(GLfloat dt)
 {
-	this->m_inputManager.ProcessEvents();
+	m_inputManager.ProcessEvents();
 }
 
 void Game::Update(GLfloat dt)
@@ -45,14 +44,14 @@ void Game::Update(GLfloat dt)
 
 void Game::Render()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+	if (m_gameState == GameState::GameActive) 
+	{
+		m_spriteRenderer.RenderSprite(m_resourceManager.GetTexture("background"),
+		                              glm::vec2(0.0f, 0.0f),
+		                              glm::vec2(m_window->GetWidth(), m_window->GetHeight()));
 
-	this->m_spriteRenderer.RenderSprite(this->m_resourceManager.GetTexture("awesomeFace"),
-	                              glm::vec2(200, 200),
-	                              glm::vec2(300, 400),
-	                              glm::vec3(0.0f, 1.0f, 0.0f),
-	                              glm::radians(45.0f));
+		m_levels[m_currentLevel]->Render(m_spriteRenderer);
+	}
 
 	m_window->SwapBuffers();
 }
@@ -62,11 +61,11 @@ bool Game::IsExiting()
 	return m_window->IsClosing();
 }
 
-void Game::InitializeWindow(int w, int h)
+void Game::InitializeWindow(int w, int h, bool isFullscreen)
 {
-	m_window = this->m_windowManager.CreateWindow(w, h, "Breakout");
+	m_window = m_windowManager.CreateWindow(w, h, "Breakout", isFullscreen);
 
-	this->m_inputManager.AddKeyHandler("exit", [this](int key, int scanCode, int action, int mods) 
+	m_inputManager.AddKeyHandler("exit", [this](int key, int scanCode, int action, int mods) 
 	{
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) 
 		{
@@ -87,7 +86,7 @@ void Game::InitializeOpenGL()
 
 void Game::InitializeResources()
 {
-	auto shader = this->m_resourceManager.CreateShaderProgram("sprite",
+	auto shader = m_resourceManager.CreateShaderProgram("sprite",
 		Shader(ShaderType::Vertex,
 			"../res/shaders/sprite/shader.vert"),
 		Shader(ShaderType::Fragment,
@@ -100,8 +99,28 @@ void Game::InitializeResources()
 	shader->SetUniform("projection", projection);
 	shader->SetUniform("image", 0);
 
-	this->m_spriteRenderer.Initialize(shader);
-	this->m_resourceManager.CreateTexture("awesomeFace",
-		"../res/textures/awesome_face.png",
-		512, 512, 4, GL_RGBA);
+	m_spriteRenderer.Initialize(shader);
+
+	m_resourceManager.CreateTexture("background",
+	                                "../res/textures/background.jpg",
+	                                1600, 900);
+	m_resourceManager.CreateTexture("awesomeFace",
+	                                "../res/textures/awesome_face.png",
+	                                512, 512, 4, GL_RGBA);
+	m_resourceManager.CreateTexture("block",
+	                                "../res/textures/block.png",
+	                                128, 128);
+	m_resourceManager.CreateTexture("block_solid",
+	                                "../res/textures/block_solid.png",
+	                                128, 128);
+
+	m_levels.push_back(std::make_shared<Level>(
+		"../res/levels/1.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
+	m_levels.push_back(std::make_shared<Level>(
+		"../res/levels/2.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
+	m_levels.push_back(std::make_shared<Level>(
+		"../res/levels/3.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
+	m_levels.push_back(std::make_shared<Level>(
+		"../res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
+	m_currentLevel = 0;
 }
