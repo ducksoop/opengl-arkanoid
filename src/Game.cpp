@@ -35,11 +35,39 @@ Game::~Game()
 void Game::HandleInput(GLfloat dt)
 {
 	m_inputManager.ProcessEvents(dt);
+
+	if (m_inputManager.IsKeyPressed(GLFW_KEY_A) || m_inputManager.IsKeyPressed(GLFW_KEY_LEFT))
+	{
+		if (m_player->m_position.x >= m_player->m_boundaries.x)
+		{
+			m_player->m_position.x -= m_player->m_velocity * dt;
+			if (m_ball->m_isStuck)
+			{
+				m_ball->m_position.x -= m_player->m_velocity * dt;
+			}
+		}
+	}
+	if (m_inputManager.IsKeyPressed(GLFW_KEY_D) || m_inputManager.IsKeyPressed(GLFW_KEY_RIGHT))
+	{
+		if (m_player->m_position.x <= m_player->m_boundaries.y)
+		{
+			m_player->m_position.x += m_player->m_velocity * dt;
+			if (m_ball->m_isStuck)
+			{
+				m_ball->m_position.x += m_player->m_velocity * dt;
+			}
+		}
+	}
+
+	if (m_inputManager.IsKeyPressed(GLFW_KEY_SPACE))
+	{
+		m_ball->m_isStuck = false;
+	}
 }
 
 void Game::Update(GLfloat dt)
 {
-	
+	m_ball->Move(glm::vec4(0.0f, m_window->GetWidth(), 0.0f, m_window->GetHeight()), dt);
 }
 
 void Game::Render()
@@ -51,7 +79,8 @@ void Game::Render()
 		                              glm::vec2(m_window->GetWidth(), m_window->GetHeight()));
 
 		m_levels[m_currentLevel]->Render(m_spriteRenderer);
-		m_player->Render(m_spriteRenderer); 
+		m_player->Render(m_spriteRenderer);
+		m_ball->Render(m_spriteRenderer);
 	}
 
 	m_window->SwapBuffers();
@@ -105,7 +134,7 @@ void Game::InitializeResources()
 	m_resourceManager.CreateTexture("background",
 	                                "../res/textures/background.jpg",
 	                                1600, 900);
-	m_resourceManager.CreateTexture("awesomeFace",
+	m_resourceManager.CreateTexture("face",
 	                                "../res/textures/awesome_face.png",
 	                                512, 512, 4, GL_RGBA);
 	m_resourceManager.CreateTexture("block",
@@ -130,9 +159,27 @@ void Game::InitializeResources()
 
 	glm::vec2 playerSize = glm::vec2(120, 20);
 
-	m_player = std::make_shared<Paddle>(glm::vec2(
-		                                    m_window->GetWidth() / 2 - playerSize.x / 2,
-		                                    m_window->GetHeight() - playerSize.y
-	                                    ), playerSize, glm::vec3(1.0f), m_resourceManager.GetTexture("paddle"),
-	                                    500.0f, glm::vec2(0, m_window->GetWidth() - playerSize.x));
+	glm::vec2 playerPosition = glm::vec2(
+		m_window->GetWidth() / 2 - playerSize.x / 2,
+		m_window->GetHeight() - playerSize.y
+	);
+
+	m_player = std::make_shared<Paddle>(playerPosition,
+	                                    playerSize,
+	                                    glm::vec3(1.0f),
+	                                    m_resourceManager.GetTexture("paddle"),
+	                                    500.0f,
+	                                    glm::vec2(0, m_window->GetWidth() - playerSize.x)
+	);
+
+	float ballRadius = 15.0f;
+	glm::vec2 ballVelocity = glm::vec2(200.0f, -500.0f);
+
+	m_ball = std::make_shared<Ball>(playerPosition + glm::vec2(playerSize.x / 2 - ballRadius,
+	                                                           -2 * ballRadius),
+	                                ballRadius,
+	                                glm::vec3(1.0f),
+	                                m_resourceManager.GetTexture("face"),
+	                                ballVelocity
+	);
 }

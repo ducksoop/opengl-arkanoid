@@ -19,7 +19,7 @@ public:
 
 	virtual void Render(const SpriteRenderer& renderer);
 	
-protected:
+//protected:
 	glm::vec2 m_position;
 	glm::vec2 m_size;
 	glm::vec3 m_color;

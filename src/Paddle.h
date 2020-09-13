@@ -16,9 +16,9 @@ public:
 	       std::shared_ptr<Texture> sprite,
 	       float velocity,
 	       const glm::vec2& boundaries);
-    ~Paddle();
+    ~Paddle() = default;
 	
-private:
+//private:
 	float m_velocity;
 	glm::vec2 m_boundaries;
 

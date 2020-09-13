@@ -10,6 +10,7 @@
 #include "Window.h"
 #include "Level.h"
 #include "Paddle.h"
+#include "Ball.h"
 
 #include <memory>
 #include <vector>
@@ -37,6 +38,7 @@ private:
 	int m_currentLevel;
 
 	std::shared_ptr<Paddle> m_player;
+	std::shared_ptr<Ball> m_ball;
 
 	WindowManager& m_windowManager = WindowManager::Instance();
 	InputManager& m_inputManager = InputManager::Instance();

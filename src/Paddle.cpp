@@ -10,25 +10,21 @@ Paddle::Paddle(const glm::vec2& position, const glm::vec2& size, const glm::vec3
 	, m_velocity(velocity)
 	, m_boundaries(boundaries)
 {
-	m_inputManager.AddKeyHandler("movePaddle", [this](float delta)
-	{
-		if (m_inputManager.IsKeyPressed(GLFW_KEY_A) || m_inputManager.IsKeyPressed(GLFW_KEY_LEFT))
-		{
-			if (m_position.x >= m_boundaries.x)
-			{
-				m_position.x -= m_velocity * delta;
-			}
-		}
-		if (m_inputManager.IsKeyPressed(GLFW_KEY_D) || m_inputManager.IsKeyPressed(GLFW_KEY_RIGHT))
-		{
-			if (m_position.x <= m_boundaries.y)
-			{
-				m_position.x += m_velocity * delta;
-			}
-		}
-	});
-}
-
-Paddle::~Paddle()
-{
+	// m_inputManager.AddKeyHandler("movePaddle", [this](float delta)
+	// {
+	// 	if (m_inputManager.IsKeyPressed(GLFW_KEY_A) || m_inputManager.IsKeyPressed(GLFW_KEY_LEFT))
+	// 	{
+	// 		if (m_position.x >= m_boundaries.x)
+	// 		{
+	// 			m_position.x -= m_velocity * delta;
+	// 		}
+	// 	}
+	// 	if (m_inputManager.IsKeyPressed(GLFW_KEY_D) || m_inputManager.IsKeyPressed(GLFW_KEY_RIGHT))
+	// 	{
+	// 		if (m_position.x <= m_boundaries.y)
+	// 		{
+	// 			m_position.x += m_velocity * delta;
+	// 		}
+	// 	}
+	// });
 }
