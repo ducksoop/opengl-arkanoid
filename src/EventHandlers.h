@@ -2,4 +2,4 @@
 
 #include <functional>
 
-using KeyHandler = std::function<void(int key, int scanCode, int action, int mods)>;
+using KeyHandler = std::function <void(float delta)>;

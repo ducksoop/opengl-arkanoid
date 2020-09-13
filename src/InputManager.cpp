@@ -15,15 +15,25 @@ void InputManager::Close()
 	m_keyHandlers.clear();
 }
 
-void InputManager::ProcessEvents()
+void InputManager::ProcessEvents(float dt)
 {
+	m_delta = dt;
 	glfwPollEvents();
+
+	for (const auto& keyHandler : m_keyHandlers)
+		keyHandler.second(m_delta);
 }
 
 void InputManager::ProcessKeyEvent(int key, int scanCode, int action, int mods)
 {
-	for (const auto& keyHandler : m_keyHandlers)
-		keyHandler.second(key, scanCode, action, mods);
+	if (action == GLFW_PRESS)
+	{
+		m_keys[key] = true;
+	}
+	else if (action == GLFW_RELEASE)
+	{
+		m_keys[key] = false;
+	}
 }
 
 void InputManager::AddKeyHandler(const std::string& name, KeyHandler keyHandler)
@@ -34,4 +44,9 @@ void InputManager::AddKeyHandler(const std::string& name, KeyHandler keyHandler)
 void InputManager::RemoveKeyHandler(const std::string& name)
 {
 	m_keyHandlers.erase(name);
+}
+
+bool InputManager::IsKeyPressed(int key)
+{
+	return m_keys[key];
 }

@@ -34,7 +34,7 @@ Game::~Game()
 
 void Game::HandleInput(GLfloat dt)
 {
-	m_inputManager.ProcessEvents();
+	m_inputManager.ProcessEvents(dt);
 }
 
 void Game::Update(GLfloat dt)
@@ -51,6 +51,7 @@ void Game::Render()
 		                              glm::vec2(m_window->GetWidth(), m_window->GetHeight()));
 
 		m_levels[m_currentLevel]->Render(m_spriteRenderer);
+		m_player->Render(m_spriteRenderer); 
 	}
 
 	m_window->SwapBuffers();
@@ -63,11 +64,11 @@ bool Game::IsExiting()
 
 void Game::InitializeWindow(int w, int h, bool isFullscreen)
 {
-	m_window = m_windowManager.CreateWindow(w, h, "Breakout", isFullscreen);
+	m_window = m_windowManager.CreateWindow(w, h, "Arkanoid", isFullscreen);
 
-	m_inputManager.AddKeyHandler("exit", [this](int key, int scanCode, int action, int mods) 
+	m_inputManager.AddKeyHandler("exit", [this](float delta) 
 	{
-		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) 
+		if (m_inputManager.IsKeyPressed(GLFW_KEY_ESCAPE)) 
 		{
 			m_window->SetShouldClose(true);
 		}
@@ -113,6 +114,9 @@ void Game::InitializeResources()
 	m_resourceManager.CreateTexture("block_solid",
 	                                "../res/textures/block_solid.png",
 	                                128, 128);
+	m_resourceManager.CreateTexture("paddle",
+	                                "../res/textures/paddle.png",
+	                                512, 128, 4, GL_RGBA);
 
 	m_levels.push_back(std::make_shared<Level>(
 		"../res/levels/1.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
@@ -123,4 +127,12 @@ void Game::InitializeResources()
 	m_levels.push_back(std::make_shared<Level>(
 		"../res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_currentLevel = 0;
+
+	glm::vec2 playerSize = glm::vec2(120, 20);
+
+	m_player = std::make_shared<Paddle>(glm::vec2(
+		                                    m_window->GetWidth() / 2 - playerSize.x / 2,
+		                                    m_window->GetHeight() - playerSize.y
+	                                    ), playerSize, glm::vec3(1.0f), m_resourceManager.GetTexture("paddle"),
+	                                    500.0f, glm::vec2(0, m_window->GetWidth() - playerSize.x));
 }

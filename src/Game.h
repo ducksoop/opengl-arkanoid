@@ -9,6 +9,7 @@
 #include "WindowManager.h"
 #include "Window.h"
 #include "Level.h"
+#include "Paddle.h"
 
 #include <memory>
 #include <vector>
@@ -34,6 +35,8 @@ private:
 	std::shared_ptr<Window> m_window;
 	std::vector<std::shared_ptr<Level>> m_levels;
 	int m_currentLevel;
+
+	std::shared_ptr<Paddle> m_player;
 
 	WindowManager& m_windowManager = WindowManager::Instance();
 	InputManager& m_inputManager = InputManager::Instance();
