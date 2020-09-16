@@ -3,11 +3,28 @@ project(Arkanoid)
 
 find_package(OpenGL REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -static")
+
+include_directories(
+  "src/graphics"
+  "src/game"
+  "src/input"
+  "src/physics"
+  "src/utils"
+)
 
 file(GLOB SOURCES 
+  "src/game/*.cpp"
+  "src/game/*.h"
+  "src/graphics/*.cpp"
+  "src/graphics/*.h"
+  "src/input/*.cpp"
+  "src/input/*.h"
+  "src/physics/*.cpp"
+  "src/physics/*.h"
+  "src/utils/*.cpp"
+  "src/utils/*.h"
   "src/*.cpp"
-  "src/*.h"
 )
 
 # GLFW build configuration
