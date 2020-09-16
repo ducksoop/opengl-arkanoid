@@ -19,7 +19,12 @@ public:
 
 	const glm::vec2& GetVelocity() const;
 	float GetRadius() const;
-	bool GetIsStuck() const;
+	bool IsStuck() const;
+	const glm::vec4& GetBoundaries() const;
+
+	void SetVelocity(const glm::vec2 velocity);
+	void SetVelocityX(float x);
+	void SetVelocityY(float y);
 	void SetIsStuck(bool flag);
 
 private:

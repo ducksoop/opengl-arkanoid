@@ -12,6 +12,12 @@
 
 #include <iostream>
 #include <utility>
+#include <tuple>
+
+namespace {
+	const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -350.0f);
+	const float INITIAL_PLAYER_VELOCITY = 500.0f;
+}
 
 Game::Game(int w, int h, bool isFullscreen)
 	: m_gameState(GameState::GameActive)
@@ -35,26 +41,27 @@ Game::~Game()
 void Game::HandleInput(GLfloat dt)
 {
 	m_inputManager.ProcessEvents(dt);
+	float velocity = m_player->GetVelocity() * dt;
 
 	if (m_inputManager.IsKeyPressed(GLFW_KEY_A) || m_inputManager.IsKeyPressed(GLFW_KEY_LEFT))
 	{
-		if (m_player->m_position.x >= m_player->GetBoundaries().x)
+		if (m_player->GetPosition().x >= m_player->GetBoundaries().x)
 		{
-			m_player->m_position.x -= m_player->GetVelocity() * dt;
-			if (m_ball->GetIsStuck())
+			m_player->UpdatePositionX(-velocity);
+			if (m_ball->IsStuck())
 			{
-				m_ball->m_position.x -= m_player->GetVelocity() * dt;
+				m_ball->UpdatePositionX(-velocity);
 			}
 		}
 	}
 	if (m_inputManager.IsKeyPressed(GLFW_KEY_D) || m_inputManager.IsKeyPressed(GLFW_KEY_RIGHT))
 	{
-		if (m_player->m_position.x <= m_player->GetBoundaries().y)
+		if (m_player->GetPosition().x <= m_player->GetBoundaries().y)
 		{
-			m_player->m_position.x += m_player->GetVelocity() * dt;
-			if (m_ball->GetIsStuck())
+			m_player->UpdatePositionX(velocity);
+			if (m_ball->IsStuck())
 			{
-				m_ball->m_position.x += m_player->GetVelocity() * dt;
+				m_ball->UpdatePositionX(velocity);
 			}
 		}
 	}
@@ -169,33 +176,56 @@ void Game::InitializeResources()
 	                                    playerSize,
 	                                    glm::vec3(1.0f),
 	                                    m_resourceManager.GetTexture("paddle"),
-	                                    500.0f,
+	                                    INITIAL_PLAYER_VELOCITY,
 	                                    glm::vec2(0, m_window->GetWidth() - playerSize.x)
 	);
 
 	float ballRadius = 15.0f;
-	glm::vec2 ballVelocity = glm::vec2(200.0f, -500.0f);
-
 	m_ball = std::make_shared<Ball>(playerPosition + glm::vec2(playerSize.x / 2 - ballRadius,
 	                                                           -2 * ballRadius),
 	                                ballRadius,
 	                                glm::vec3(1.0f),
 	                                m_resourceManager.GetTexture("face"),
-	                                ballVelocity,
+	                                INITIAL_BALL_VELOCITY,
 									glm::vec4(0.0f, m_window->GetWidth(), 0.0f, m_window->GetHeight())
 	);
 }
 
-bool Game::CheckCollisionAABB(const Ball& ball, const Brick& brick)
+Direction Game::GetVectorDirection(const glm::vec2& target)
+{
+	glm::vec2 compass[] = 
+	{
+		glm::vec2(0.0f, 1.0f),		// up
+		glm::vec2(0.0f, -1.0f),	// down
+		glm::vec2(-1.0f, 0.0f),	// left
+		glm::vec2(1.0f, 0.0f)		// right
+	};
+
+	float max = 0.0f;
+	int bestMatch = -1;
+	for (GLuint i = 0; i < 4; i++) 
+	{
+		float dotProduct = glm::dot(glm::normalize(target), compass[i]);
+		if (dotProduct > max) 
+		{
+			max = dotProduct;
+			bestMatch = i;
+		}
+	}
+
+	return static_cast<Direction>(bestMatch);
+}
+
+Collision Game::CheckCollisionAABB(const Ball& ball, const GameObject& gameObject)
 {
 	// Get center point on circle first
-	glm::vec2 center = ball.m_position + ball.GetRadius();
+	glm::vec2 center = ball.GetPosition() + ball.GetRadius();
 
 	// Calculate AABB info
-	glm::vec2 aabbHalfExtents(brick.GetSize().x / 2, brick.GetSize().y / 2);
+	glm::vec2 aabbHalfExtents(gameObject.GetSize().x / 2, gameObject.GetSize().y / 2);
 	glm::vec2 aabbCenter(
-		brick.m_position.x + aabbHalfExtents.x,
-		brick.m_position.y + aabbHalfExtents.y
+		gameObject.GetPosition().x + aabbHalfExtents.x,
+		gameObject.GetPosition().y + aabbHalfExtents.y
 	);
 
 	// Get difference vector between both centers
@@ -208,20 +238,73 @@ bool Game::CheckCollisionAABB(const Ball& ball, const Brick& brick)
 	// Retrieve vector between circle and closest point AABB and check if length is less than or equal to radius
 	difference = closest - center;
 
-	return glm::length(difference) < ball.GetRadius();
+	return glm::length(difference) <= ball.GetRadius() ? 
+		std::make_tuple(true, GetVectorDirection(difference), difference) :
+		std::make_tuple(false, Direction::Up, glm::vec2(0, 0));
 }
 
 void Game::CheckCollisions()
 {
-	for (Brick& brick : m_levels[m_currentLevel]->GetBricks())
+	for (auto& brick : m_levels[m_currentLevel]->GetBricks())
 	{
-		if (!brick.IsDestroyed())
+		if (brick.IsDestroyed())
+			continue;
+
+		// There was no collision
+		Collision collision = CheckCollisionAABB(*m_ball, brick);
+		if (!std::get<0>(collision))
+			continue;
+
+		if (!brick.IsSolid())
+			brick.SetIsDestroyed(true);
+
+		// Collision resolution
+		Direction direction = std::get<1>(collision);
+		glm::vec2 difference = std::get<2>(collision);
+
+		if (direction == Direction::Left || direction == Direction::Right)
 		{
-			if (CheckCollisionAABB(*m_ball, brick))
+			m_ball->SetVelocityX(-m_ball->GetVelocity().x);
+
+			// Relocate
+			float penetration = m_ball->GetRadius() - std::abs(difference.x);
+			if (direction == Direction::Left)
 			{
-				if (!brick.IsSolid())
-					brick.SetIsDestroyed(true);
+				m_ball->UpdatePositionX(penetration); // Move ball to right
+			}
+			else
+			{
+				m_ball->UpdatePositionX(-penetration); // Move ball to left
 			}
 		}
+		else
+		{
+			m_ball->SetVelocityY(-m_ball->GetVelocity().y);
+			float penetration = m_ball->GetRadius() - std::abs(difference.y);
+			if (direction == Direction::Up)
+			{
+				m_ball->UpdatePositionY(-penetration);	// Move ball up
+			}
+			else
+			{
+				m_ball->UpdatePositionY(penetration);	// Move ball down
+			}
+		}
+	}
+
+	Collision collision = CheckCollisionAABB(*m_ball, *m_player);
+	if (std::get<0>(collision) && !m_ball->IsStuck())
+	{
+		// Check where it hit the board, and change the velocity based on where it hit
+		float centerBoard = m_player->GetPosition().x + m_player->GetSize().x / 2;
+		float distance = (m_ball->GetPosition().x + m_ball->GetRadius()) - centerBoard;
+		float percentage = distance / (m_player->GetSize().x / 2);
+
+		// Then move accordingly
+		float strength = 2.0f;
+		glm::vec2 oldVelocity = m_ball->GetVelocity();
+		m_ball->SetVelocityX(INITIAL_BALL_VELOCITY.x * percentage * strength);
+		m_ball->SetVelocityY(-1 * std::abs(m_ball->GetVelocity().y));
+		m_ball->SetVelocity(glm::normalize(m_ball->GetVelocity()) * glm::length(oldVelocity));
 	}
 }

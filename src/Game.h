@@ -11,6 +11,8 @@
 #include "Level.h"
 #include "Paddle.h"
 #include "Ball.h"
+#include "Direction.h"
+#include "Collision.h"
 
 #include <memory>
 #include <vector>
@@ -32,7 +34,8 @@ private:
 	void InitializeOpenGL();
 	void InitializeResources();
 
-	bool CheckCollisionAABB(const Ball& ball, const Brick& brick);
+	Direction GetVectorDirection(const glm::vec2& target);
+	Collision CheckCollisionAABB(const Ball& ball, const GameObject& gameObject);
 	void CheckCollisions();
 	
 	GameState m_gameState;

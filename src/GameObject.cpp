@@ -19,3 +19,38 @@ const glm::vec2& GameObject::GetSize() const
 {
 	return m_size;
 }
+
+const glm::vec2& GameObject::GetPosition() const
+{
+	return m_position;
+}
+
+const glm::vec2& GameObject::GetColor() const
+{
+	return m_color;
+}
+
+void GameObject::SetPosition(const glm::vec2& position)
+{
+	m_position = position;
+}
+
+void GameObject::SetPositionX(float x)
+{
+	m_position.x = x;
+}
+
+void GameObject::SetPositionY(float y)
+{
+	m_position.y = y;
+}
+
+void GameObject::UpdatePositionX(float delta)
+{
+	m_position.x += delta;
+}
+
+void GameObject::UpdatePositionY(float delta)
+{
+	m_position.y += delta;
+}

@@ -20,10 +20,17 @@ public:
 	virtual void Render(const SpriteRenderer& renderer);
 
 	const glm::vec2& GetSize() const;
+	const glm::vec2& GetPosition() const;
+	const glm::vec2& GetColor() const;
 
-	glm::vec2 m_position;
+	void SetPosition(const glm::vec2& position);
+	void SetPositionX(float x);
+	void SetPositionY(float y);
+	void UpdatePositionX(float delta);
+	void UpdatePositionY(float delta);
 
 protected:
+	glm::vec2 m_position;
 	glm::vec2 m_size;
 	glm::vec3 m_color;
 	std::shared_ptr<Texture> m_sprite;

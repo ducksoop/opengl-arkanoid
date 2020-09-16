@@ -50,12 +50,32 @@ float Ball::GetRadius() const
 	return m_radius;
 }
 
-bool Ball::GetIsStuck() const
+bool Ball::IsStuck() const
 {
 	return m_isStuck;
+}
+
+const glm::vec4& Ball::GetBoundaries() const
+{
+	return m_boundaries;
 }
 
 void Ball::SetIsStuck(bool flag)
 {
 	m_isStuck = flag;
+}
+
+void Ball::SetVelocity(const glm::vec2 velocity)
+{
+	m_velocity = velocity;
+}
+
+void Ball::SetVelocityX(float x)
+{
+	m_velocity.x = x;
+}
+
+void Ball::SetVelocityY(float y)
+{
+	m_velocity.y = y;
 }
