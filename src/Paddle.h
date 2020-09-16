@@ -17,8 +17,11 @@ public:
 	       float velocity,
 	       const glm::vec2& boundaries);
     ~Paddle() = default;
+
+	float GetVelocity() const;
+	const glm::vec2& GetBoundaries() const;
 	
-//private:
+private:
 	float m_velocity;
 	glm::vec2 m_boundaries;
 

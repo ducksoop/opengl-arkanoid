@@ -18,9 +18,12 @@ public:
 	virtual ~GameObject() = default;
 
 	virtual void Render(const SpriteRenderer& renderer);
-	
-//protected:
+
+	const glm::vec2& GetSize() const;
+
 	glm::vec2 m_position;
+
+protected:
 	glm::vec2 m_size;
 	glm::vec3 m_color;
 	std::shared_ptr<Texture> m_sprite;

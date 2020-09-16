@@ -28,3 +28,13 @@ Paddle::Paddle(const glm::vec2& position, const glm::vec2& size, const glm::vec3
 	// 	}
 	// });
 }
+
+float Paddle::GetVelocity() const
+{
+	return m_velocity;
+}
+
+const glm::vec2& Paddle::GetBoundaries() const
+{
+	return m_boundaries;
+}

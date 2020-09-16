@@ -31,6 +31,9 @@ private:
 	void InitializeWindow(int w, int h, bool isFullscreen);
 	void InitializeOpenGL();
 	void InitializeResources();
+
+	bool CheckCollisionAABB(const Ball& ball, const Brick& brick);
+	void CheckCollisions();
 	
 	GameState m_gameState;
 	std::shared_ptr<Window> m_window;

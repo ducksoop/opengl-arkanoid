@@ -11,13 +11,21 @@ public:
 	     float radius,
 	     const glm::vec3& color,
 	     std::shared_ptr<Texture> sprite,
-	     const glm::vec2& velocity);
+	     const glm::vec2& velocity,
+	     const glm::vec4& boundaries);
 	~Ball() = default;
 
-	void Move(const glm::vec4& boundaries, float delta);
+	void Update(float dt);
 
-//private:
+	const glm::vec2& GetVelocity() const;
+	float GetRadius() const;
+	bool GetIsStuck() const;
+	void SetIsStuck(bool flag);
+
+private:
 	glm::vec2 m_velocity;
 	float m_radius;
 	bool m_isStuck;
+
+	glm::vec4 m_boundaries;
 };

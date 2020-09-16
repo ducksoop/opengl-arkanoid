@@ -14,3 +14,8 @@ void GameObject::Render(const SpriteRenderer& renderer)
 {
 	renderer.RenderSprite(m_sprite, m_position, m_size, m_color);
 }
+
+const glm::vec2& GameObject::GetSize() const
+{
+	return m_size;
+}

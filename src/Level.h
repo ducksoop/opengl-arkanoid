@@ -14,6 +14,8 @@ public:
 
 	void Render(SpriteRenderer& renderer);
 	bool IsCleared();
+
+	std::vector<Brick>& GetBricks();
 	
 private:
 	std::vector<std::vector<int>> LoadTiles(const std::string& path);

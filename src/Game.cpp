@@ -38,36 +38,37 @@ void Game::HandleInput(GLfloat dt)
 
 	if (m_inputManager.IsKeyPressed(GLFW_KEY_A) || m_inputManager.IsKeyPressed(GLFW_KEY_LEFT))
 	{
-		if (m_player->m_position.x >= m_player->m_boundaries.x)
+		if (m_player->m_position.x >= m_player->GetBoundaries().x)
 		{
-			m_player->m_position.x -= m_player->m_velocity * dt;
-			if (m_ball->m_isStuck)
+			m_player->m_position.x -= m_player->GetVelocity() * dt;
+			if (m_ball->GetIsStuck())
 			{
-				m_ball->m_position.x -= m_player->m_velocity * dt;
+				m_ball->m_position.x -= m_player->GetVelocity() * dt;
 			}
 		}
 	}
 	if (m_inputManager.IsKeyPressed(GLFW_KEY_D) || m_inputManager.IsKeyPressed(GLFW_KEY_RIGHT))
 	{
-		if (m_player->m_position.x <= m_player->m_boundaries.y)
+		if (m_player->m_position.x <= m_player->GetBoundaries().y)
 		{
-			m_player->m_position.x += m_player->m_velocity * dt;
-			if (m_ball->m_isStuck)
+			m_player->m_position.x += m_player->GetVelocity() * dt;
+			if (m_ball->GetIsStuck())
 			{
-				m_ball->m_position.x += m_player->m_velocity * dt;
+				m_ball->m_position.x += m_player->GetVelocity() * dt;
 			}
 		}
 	}
 
 	if (m_inputManager.IsKeyPressed(GLFW_KEY_SPACE))
 	{
-		m_ball->m_isStuck = false;
+		m_ball->SetIsStuck(false);
 	}
 }
 
 void Game::Update(GLfloat dt)
 {
-	m_ball->Move(glm::vec4(0.0f, m_window->GetWidth(), 0.0f, m_window->GetHeight()), dt);
+	m_ball->Update(dt);
+	CheckCollisions();
 }
 
 void Game::Render()
@@ -180,6 +181,47 @@ void Game::InitializeResources()
 	                                ballRadius,
 	                                glm::vec3(1.0f),
 	                                m_resourceManager.GetTexture("face"),
-	                                ballVelocity
+	                                ballVelocity,
+									glm::vec4(0.0f, m_window->GetWidth(), 0.0f, m_window->GetHeight())
 	);
+}
+
+bool Game::CheckCollisionAABB(const Ball& ball, const Brick& brick)
+{
+	// Get center point on circle first
+	glm::vec2 center = ball.m_position + ball.GetRadius();
+
+	// Calculate AABB info
+	glm::vec2 aabbHalfExtents(brick.GetSize().x / 2, brick.GetSize().y / 2);
+	glm::vec2 aabbCenter(
+		brick.m_position.x + aabbHalfExtents.x,
+		brick.m_position.y + aabbHalfExtents.y
+	);
+
+	// Get difference vector between both centers
+	glm::vec2 difference = center - aabbCenter;
+	glm::vec2 clamped = glm::clamp(difference, -aabbHalfExtents, aabbHalfExtents);
+
+	// Add clamped value to AABB center and we get the value of box closes to circle
+	glm::vec2 closest = aabbCenter + clamped;
+
+	// Retrieve vector between circle and closest point AABB and check if length is less than or equal to radius
+	difference = closest - center;
+
+	return glm::length(difference) < ball.GetRadius();
+}
+
+void Game::CheckCollisions()
+{
+	for (Brick& brick : m_levels[m_currentLevel]->GetBricks())
+	{
+		if (!brick.IsDestroyed())
+		{
+			if (CheckCollisionAABB(*m_ball, brick))
+			{
+				if (!brick.IsSolid())
+					brick.SetIsDestroyed(true);
+			}
+		}
+	}
 }

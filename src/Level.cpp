@@ -18,12 +18,20 @@ Level::Level(const std::string& path, int levelWidth, int levelHeight)
 void Level::Render(SpriteRenderer& renderer)
 {
 	for (auto& brick : m_bricks)
-		brick.Render(renderer);
+	{
+		if (!brick.IsDestroyed())
+			brick.Render(renderer);
+	}
 }
 
 bool Level::IsCleared()
 {
 	return false;
+}
+
+std::vector<Brick>& Level::GetBricks()
+{
+	return m_bricks;
 }
 
 std::vector<std::vector<int>> Level::LoadTiles(const std::string& path)
