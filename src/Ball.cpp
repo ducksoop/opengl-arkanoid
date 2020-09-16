@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Ball::Ball(const glm::vec2& position, float radius, const glm::vec3& color, std::shared_ptr<Texture> sprite,
+Ball::Ball(const glm::vec2& position, float radius, const glm::vec3& color, Texture* sprite,
 	const glm::vec2& velocity, const glm::vec4& boundaries)
 	: GameObject(position, glm::vec2(2 * radius), color, sprite)
 	, m_velocity(velocity)
@@ -65,7 +65,7 @@ void Ball::SetIsStuck(bool flag)
 	m_isStuck = flag;
 }
 
-void Ball::SetVelocity(const glm::vec2 velocity)
+void Ball::SetVelocity(const glm::vec2& velocity)
 {
 	m_velocity = velocity;
 }

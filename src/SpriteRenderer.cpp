@@ -8,7 +8,7 @@
 #include <memory>
 #include <iostream>
 
-void SpriteRenderer::Initialize(const std::shared_ptr<ShaderProgram> shaderProgram)
+void SpriteRenderer::Initialize(ShaderProgram* shaderProgram)
 {
 	SetShaderProgram(shaderProgram);
 
@@ -37,12 +37,12 @@ void SpriteRenderer::Initialize(const std::shared_ptr<ShaderProgram> shaderProgr
     glBindVertexArray(0);
 }
 
-void SpriteRenderer::SetShaderProgram(const std::shared_ptr<ShaderProgram> shaderProgram)
+void SpriteRenderer::SetShaderProgram(ShaderProgram* shaderProgram)
 {
     m_shaderProgram = shaderProgram;
 }
 
-void SpriteRenderer::RenderSprite(const std::shared_ptr<Texture> texture,
+void SpriteRenderer::RenderSprite(const Texture* texture,
     const glm::vec2& position,
     const glm::vec2& size,
     const glm::vec3& color,

@@ -26,16 +26,14 @@ void WindowManager::Initialize()
 
 void WindowManager::Close()
 {
-	for (auto window : m_windows)
+	for (auto& window : m_windows)
 		window->Destroy();
 
 	glfwTerminate();
 }
 
-std::shared_ptr<Window> WindowManager::CreateWindow(int w, int h, const std::string& title, bool fullscreen, bool vsync)
+Window* WindowManager::CreateWindow(int w, int h, const std::string& title, bool fullscreen, bool vsync)
 {
-	std::shared_ptr<Window> window(new Window(w, h, title, fullscreen, vsync));
-	m_windows.push_back(window);
-	
-	return window;
+	m_windows.push_back(std::unique_ptr<Window>(new Window(w, h, title, fullscreen, vsync)));
+	return m_windows.back().get();
 }

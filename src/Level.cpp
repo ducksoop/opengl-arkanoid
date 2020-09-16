@@ -19,8 +19,8 @@ void Level::Render(SpriteRenderer& renderer)
 {
 	for (auto& brick : m_bricks)
 	{
-		if (!brick.IsDestroyed())
-			brick.Render(renderer);
+		if (!brick->IsDestroyed())
+			brick->Render(renderer);
 	}
 }
 
@@ -29,7 +29,7 @@ bool Level::IsCleared()
 	return false;
 }
 
-std::vector<Brick>& Level::GetBricks()
+std::vector<std::unique_ptr<Brick>>& Level::GetBricks()
 {
 	return m_bricks;
 }
@@ -56,7 +56,7 @@ std::vector<std::vector<int>> Level::LoadTiles(const std::string& path)
 	return tiles;
 }
 
-void Level::InitializeLevel(std::vector<std::vector<int>> tiles, int levelWidth, int levelHeight)
+void Level::InitializeLevel(std::vector<std::vector<int>>& tiles, int levelWidth, int levelHeight)
 {
 	float tileWidth = static_cast<float>(levelWidth) / static_cast<float>(tiles[0].size());
 	float tileHeight = static_cast<float>(levelHeight) / static_cast<float>(tiles.size());
@@ -71,29 +71,29 @@ void Level::InitializeLevel(std::vector<std::vector<int>> tiles, int levelWidth,
 			switch (tiles[i][j])
 			{
 			case 1:
-				m_bricks.emplace_back(position, size, glm::vec3(0.8f, 0.8f, 0.7f),
-				                      ResourceManager::Instance().GetTexture("block_solid"),
-				                      true);
+				m_bricks.push_back(std::make_unique<Brick>(position, size, glm::vec3(0.8f, 0.8f, 0.7f),
+					ResourceManager::Instance().GetTexture("block_solid"),
+					true));
 				break;
 			case 2:
-				m_bricks.emplace_back(position, size, glm::vec3(0.2f, 0.6f, 1.0f),
-				                      ResourceManager::Instance().GetTexture("block"),
-				                      false);
+				m_bricks.push_back(std::make_unique<Brick>(position, size, glm::vec3(0.2f, 0.6f, 1.0f),
+					ResourceManager::Instance().GetTexture("block"),
+					false));
 				break;
 			case 3:
-				m_bricks.emplace_back(position, size, glm::vec3(0.0f, 0.7f, 0.0f),
-				                      ResourceManager::Instance().GetTexture("block"),
-				                      false);
+				m_bricks.push_back(std::make_unique<Brick>(position, size, glm::vec3(0.0f, 0.7f, 0.0f),
+					ResourceManager::Instance().GetTexture("block"),
+					false));
 				break;
 			case 4:
-				m_bricks.emplace_back(position, size, glm::vec3(0.8f, 0.8f, 0.4f),
-				                      ResourceManager::Instance().GetTexture("block"),
-				                      false);
+				m_bricks.push_back(std::make_unique<Brick>(position, size, glm::vec3(0.8f, 0.8f, 0.4f),
+					ResourceManager::Instance().GetTexture("block"),
+					false));
 				break;
 			case 5:
-				m_bricks.emplace_back(position, size, glm::vec3(1.0f, 0.5f, 0.0f),
-				                      ResourceManager::Instance().GetTexture("block"),
-				                      false);
+				m_bricks.push_back(std::make_unique<Brick>(position, size, glm::vec3(1.0f, 0.5f, 0.0f),
+					ResourceManager::Instance().GetTexture("block"),
+					false));
 				break;
 			default:
 				break;

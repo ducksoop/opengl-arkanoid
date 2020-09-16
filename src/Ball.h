@@ -10,7 +10,7 @@ public:
 	Ball(const glm::vec2& position,
 	     float radius,
 	     const glm::vec3& color,
-	     std::shared_ptr<Texture> sprite,
+	     Texture* sprite,
 	     const glm::vec2& velocity,
 	     const glm::vec4& boundaries);
 	~Ball() = default;
@@ -22,7 +22,7 @@ public:
 	bool IsStuck() const;
 	const glm::vec4& GetBoundaries() const;
 
-	void SetVelocity(const glm::vec2 velocity);
+	void SetVelocity(const glm::vec2& velocity);
 	void SetVelocityX(float x);
 	void SetVelocityY(float y);
 	void SetIsStuck(bool flag);

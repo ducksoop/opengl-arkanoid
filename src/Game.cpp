@@ -15,7 +15,7 @@
 #include <tuple>
 
 namespace {
-	const glm::vec2 INITIAL_BALL_VELOCITY(100.0f, -350.0f);
+	const glm::vec2 INITIAL_BALL_VELOCITY(250.0f, -350.0f);
 	const float INITIAL_PLAYER_VELOCITY = 500.0f;
 }
 
@@ -155,13 +155,13 @@ void Game::InitializeResources()
 	                                "../res/textures/paddle.png",
 	                                512, 128, 4, GL_RGBA);
 
-	m_levels.push_back(std::make_shared<Level>(
+	m_levels.push_back(std::make_unique<Level>(
 		"../res/levels/1.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
-	m_levels.push_back(std::make_shared<Level>(
+	m_levels.push_back(std::make_unique<Level>(
 		"../res/levels/2.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
-	m_levels.push_back(std::make_shared<Level>(
+	m_levels.push_back(std::make_unique<Level>(
 		"../res/levels/3.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
-	m_levels.push_back(std::make_shared<Level>(
+	m_levels.push_back(std::make_unique<Level>(
 		"../res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_currentLevel = 0;
 
@@ -172,7 +172,7 @@ void Game::InitializeResources()
 		m_window->GetHeight() - playerSize.y
 	);
 
-	m_player = std::make_shared<Paddle>(playerPosition,
+	m_player = std::make_unique<Paddle>(playerPosition,
 	                                    playerSize,
 	                                    glm::vec3(1.0f),
 	                                    m_resourceManager.GetTexture("paddle"),
@@ -181,7 +181,7 @@ void Game::InitializeResources()
 	);
 
 	float ballRadius = 15.0f;
-	m_ball = std::make_shared<Ball>(playerPosition + glm::vec2(playerSize.x / 2 - ballRadius,
+	m_ball = std::make_unique<Ball>(playerPosition + glm::vec2(playerSize.x / 2 - ballRadius,
 	                                                           -2 * ballRadius),
 	                                ballRadius,
 	                                glm::vec3(1.0f),
@@ -247,16 +247,16 @@ void Game::CheckCollisions()
 {
 	for (auto& brick : m_levels[m_currentLevel]->GetBricks())
 	{
-		if (brick.IsDestroyed())
+		if (brick->IsDestroyed())
 			continue;
 
 		// There was no collision
-		Collision collision = CheckCollisionAABB(*m_ball, brick);
+		Collision collision = CheckCollisionAABB(*m_ball, *brick.get());
 		if (!std::get<0>(collision))
 			continue;
 
-		if (!brick.IsSolid())
-			brick.SetIsDestroyed(true);
+		if (!brick->IsSolid())
+			brick->SetIsDestroyed(true);
 
 		// Collision resolution
 		Direction direction = std::get<1>(collision);

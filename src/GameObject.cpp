@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-GameObject::GameObject(const glm::vec2& position, const glm::vec2& size, const glm::vec3& color, std::shared_ptr<Texture> sprite)
+GameObject::GameObject(const glm::vec2& position, const glm::vec2& size, const glm::vec3& color, Texture* sprite)
 	: m_position(position)
 	, m_size(size)
 	, m_color(color)
@@ -25,7 +25,7 @@ const glm::vec2& GameObject::GetPosition() const
 	return m_position;
 }
 
-const glm::vec2& GameObject::GetColor() const
+const glm::vec3& GameObject::GetColor() const
 {
 	return m_color;
 }

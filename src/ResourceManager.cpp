@@ -21,32 +21,34 @@ void ResourceManager::Close()
 		texture.second->Destroy();
 }
 
-std::shared_ptr<ShaderProgram> ResourceManager::GetShaderProgram(const std::string& name)
+ShaderProgram* ResourceManager::GetShaderProgram(const std::string& name)
 {
-	return m_shaderPrograms[name];
+	return m_shaderPrograms[name].get();
 }
 
-std::shared_ptr<Texture> ResourceManager::GetTexture(const std::string& name)
+Texture* ResourceManager::GetTexture(const std::string& name)
 {
-	return m_textures[name];
+	return m_textures[name].get();
 }
 
-std::shared_ptr<ShaderProgram> ResourceManager::CreateShaderProgram(const std::string& name, const Shader& vertexShader,
+ShaderProgram* ResourceManager::CreateShaderProgram(const std::string& name, const Shader& vertexShader,
 	const Shader& fragmentShader)
 {
-	std::shared_ptr<ShaderProgram> shader(new ShaderProgram(vertexShader, fragmentShader));
-	m_shaderPrograms[name] = shader;
+	m_shaderPrograms[name] = std::unique_ptr<ShaderProgram>(
+		new ShaderProgram(vertexShader, fragmentShader)
+	);
 
-	return shader;
+	return m_shaderPrograms[name].get();
 }
 
-std::shared_ptr<Texture> ResourceManager::CreateTexture(const std::string& name, const std::string& path, GLuint w, GLuint h,
+Texture* ResourceManager::CreateTexture(const std::string& name, const std::string& path, GLuint w, GLuint h,
 	GLint channels, GLuint format)
 {
 	unsigned char* image = FileManager::Instance().ReadImage(path, w, h, channels);
 
-	std::shared_ptr<Texture> texture(new Texture(w, h, image, format));
-	m_textures[name] = texture;
+	m_textures[name] = std::unique_ptr<Texture>(
+		new Texture(w, h, image, format)
+	);
 
-	return texture;
+	return m_textures[name].get();
 }

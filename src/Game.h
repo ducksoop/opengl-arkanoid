@@ -39,12 +39,12 @@ private:
 	void CheckCollisions();
 	
 	GameState m_gameState;
-	std::shared_ptr<Window> m_window;
-	std::vector<std::shared_ptr<Level>> m_levels;
+	Window* m_window;
+	std::vector<std::unique_ptr<Level>> m_levels;
 	int m_currentLevel;
 
-	std::shared_ptr<Paddle> m_player;
-	std::shared_ptr<Ball> m_ball;
+	std::unique_ptr<Paddle> m_player;
+	std::unique_ptr<Ball> m_ball;
 
 	WindowManager& m_windowManager = WindowManager::Instance();
 	InputManager& m_inputManager = InputManager::Instance();
