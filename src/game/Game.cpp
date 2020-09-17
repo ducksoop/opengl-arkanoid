@@ -76,6 +76,7 @@ void Game::HandleInput(GLfloat dt)
 void Game::Update(GLfloat dt)
 {
 	m_ball->Update(dt);
+	m_particleEmitter->Update(dt, *m_ball, 5, glm::vec2(m_ball->GetRadius() / 2));
 	CheckCollisions();
 }
 
@@ -89,6 +90,7 @@ void Game::Render()
 
 		m_levels[m_currentLevel]->Render(m_spriteRenderer);
 		m_player->Render(m_spriteRenderer);
+		m_particleEmitter->Render();
 		m_ball->Render(m_spriteRenderer);
 	}
 
@@ -125,7 +127,7 @@ void Game::InitializeOpenGL()
 
 void Game::InitializeResources()
 {
-	auto shader = m_resourceManager.CreateShaderProgram("sprite",
+	auto spriteShader = m_resourceManager.CreateShaderProgram("sprite",
 		Shader(ShaderType::Vertex,
 			"../res/shaders/sprite/shader.vert"),
 		Shader(ShaderType::Fragment,
@@ -134,11 +136,21 @@ void Game::InitializeResources()
 		static_cast<GLfloat>(m_window->GetHeight()), 0.0f,
 		-1.0f, 1.0f);
 
-	shader->Use();
-	shader->SetUniform("projection", projection);
-	shader->SetUniform("image", 0);
+	spriteShader->Use();
+	spriteShader->SetUniform("projection", projection);
+	spriteShader->SetUniform("sprite", 0);
 
-	m_spriteRenderer.Initialize(shader);
+	auto particleShader = m_resourceManager.CreateShaderProgram("particle",
+		Shader(ShaderType::Vertex,
+			"../res/shaders/particle/shader.vert"),
+		Shader(ShaderType::Fragment,
+			"../res/shaders/particle/shader.frag"));
+
+	particleShader->Use();
+	particleShader->SetUniform("projection", projection);
+	particleShader->SetUniform("sprite", 0);
+
+	m_spriteRenderer.Initialize(spriteShader);
 
 	m_resourceManager.CreateTexture("background",
 	                                "../res/textures/background.jpg",
@@ -155,6 +167,13 @@ void Game::InitializeResources()
 	m_resourceManager.CreateTexture("paddle",
 	                                "../res/textures/paddle.png",
 	                                512, 128, 4, GL_RGBA);
+	m_resourceManager.CreateTexture("particle",
+	                                "../res/textures/particle.png",
+	                                500, 500, 4, GL_RGBA);
+
+	m_particleEmitter = std::make_unique<ParticleEmitter>(m_resourceManager.GetShaderProgram("particle"),
+	                                                      m_resourceManager.GetTexture("particle"),
+	                                                      500);
 
 	m_levels.push_back(std::make_unique<Level>(
 		"../res/levels/1.txt", m_window->GetWidth(), m_window->GetHeight() / 2));

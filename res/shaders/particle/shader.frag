@@ -4,8 +4,8 @@ in vec2 uv;
 out vec4 finalColor;
 
 uniform sampler2D sprite;
-uniform vec3 color;
+uniform vec4 particleColor;
 
 void main() {
-    finalColor = texture(sprite, uv) * vec4(color, 1.0f);
+    finalColor = texture(sprite, uv) * particleColor;
 }
