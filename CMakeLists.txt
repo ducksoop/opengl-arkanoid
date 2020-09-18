@@ -27,34 +27,46 @@ file(GLOB SOURCES
   "src/*.cpp"
 )
 
+# ------------------------
 # GLFW build configuration
-
+# ------------------------
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 add_subdirectory(externals/glfw)
 
-# end
 # ------------------------
 
+# ------------------------
 # GLEW build configuration
+# ------------------------
 
 add_subdirectory(externals/glew)
 include_directories(externals/glew/include)
 add_library(glew STATIC externals/glew/src/glew.c)
 add_definitions(-DGLEW_STATIC)
 
-# end
+# ------------------------
+
+# ------------------------
+# OpenAL build configuration
+# ------------------------
+
+add_subdirectory(externals/openal-soft)
+include_directories(externals/openal-soft/include)
+
+# ------------------------
 
 # ------------------------
 # Header-only libraries
+# ------------------------
 
 include_directories(externals/glm)
 include_directories(externals/stb)
 
-# end
+# ------------------------
 
 add_executable(Arkanoid ${SOURCES})
 
-target_link_libraries(Arkanoid glfw glew ${OPENGL_LIBRARY})
+target_link_libraries(Arkanoid glfw glew OpenAL ${OPENGL_LIBRARY})
