@@ -1,6 +1,6 @@
 #include "CollisionDetector.h"
 
-Collision CollisionDetector::CheckCollisionAABB(const Ball& ball, const GameObject& gameObject)
+Collision CollisionDetector::CheckCollisionAABB_Circle(const Ball& ball, const GameObject& gameObject)
 {
 	// Get center point on circle first
 	glm::vec2 center = ball.GetPosition() + ball.GetRadius();
@@ -25,6 +25,20 @@ Collision CollisionDetector::CheckCollisionAABB(const Ball& ball, const GameObje
 	return glm::length(difference) <= ball.GetRadius() ?
 		std::make_tuple(true, GetVectorDirection(difference), difference) :
 		std::make_tuple(false, Direction::Up, glm::vec2(0, 0));
+}
+
+bool CollisionDetector::CheckCollisionAABB_AABB(const GameObject& gameObject1, const GameObject& gameObject2)
+{
+	// x-axis
+	bool collisionX = gameObject1.GetPosition().x + gameObject1.GetSize().x >= gameObject2.GetPosition().x &&
+					  gameObject2.GetPosition().x + gameObject2.GetSize().x >= gameObject1.GetPosition().x;
+
+	// y-axis
+	bool collisionY = gameObject1.GetPosition().y + gameObject1.GetSize().y >= gameObject2.GetPosition().y &&
+					  gameObject2.GetPosition().y + gameObject2.GetSize().y >= gameObject1.GetPosition().y;
+
+	// Collision occurred on both axes
+	return collisionX && collisionY;
 }
 
 Direction CollisionDetector::GetVectorDirection(const glm::vec2& target)

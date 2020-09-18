@@ -20,6 +20,8 @@ public:
 
 	float GetVelocity() const;
 	const glm::vec2& GetBoundaries() const;
+
+	void SetBoundaries(const glm::vec2& boundaries);
 	
 private:
 	float m_velocity;

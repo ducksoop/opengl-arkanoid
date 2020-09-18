@@ -29,6 +29,14 @@ public:
 	void UpdatePositionX(float delta);
 	void UpdatePositionY(float delta);
 
+	void SetSize(const glm::vec2& size);
+	void SetSizeX(float x);
+	void SetSizeY(float y);
+	void UpdateSizeX(float delta);
+	void UpdateSizeY(float delta);
+
+	void SetColor(const glm::vec3& color);
+
 protected:
 	glm::vec2 m_position;
 	glm::vec2 m_size;

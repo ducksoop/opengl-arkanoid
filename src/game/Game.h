@@ -11,7 +11,7 @@
 #include "Level.h"
 #include "Paddle.h"
 #include "Ball.h"
-#include "Direction.h"
+#include "Powerup.h"
 #include "Collision.h"
 #include "ParticleEmitter.h"
 #include "PostProcessing.h"
@@ -37,10 +37,12 @@ private:
 	void InitializeResources();
 
 	void CheckCollisions();
+	void SpawnPowerups(const Brick& brick);
 	
 	GameState m_gameState;
 	Window* m_window;
 	std::vector<std::unique_ptr<Level>> m_levels;
+	std::vector<std::unique_ptr<Powerup>> m_powerups;
 	int m_currentLevel;
 
 	std::unique_ptr<Paddle> m_player;

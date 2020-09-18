@@ -54,3 +54,33 @@ void GameObject::UpdatePositionY(float delta)
 {
 	m_position.y += delta;
 }
+
+void GameObject::SetSize(const glm::vec2& size)
+{
+	m_size = size;
+}
+
+void GameObject::SetSizeX(float x)
+{
+	m_size.x = x;
+}
+
+void GameObject::SetSizeY(float y)
+{
+	m_size.y = y;
+}
+
+void GameObject::UpdateSizeX(float delta)
+{
+	m_size.x += delta;
+}
+
+void GameObject::UpdateSizeY(float delta)
+{
+	m_size.y += delta;
+}
+
+void GameObject::SetColor(const glm::vec3& color)
+{
+	m_color = color;
+}

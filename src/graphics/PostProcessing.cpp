@@ -20,10 +20,10 @@ PostProcessing::~PostProcessing()
 {
 	glDeleteFramebuffers(1, &m_MSFBO);
 	glDeleteFramebuffers(1, &m_FBO);
-	glDeleteFramebuffers(1, &m_RBO);
-	glDeleteFramebuffers(1, &m_textureID);
-	glDeleteFramebuffers(1, &m_VAO);
-	glDeleteFramebuffers(1, &m_VBO);
+	glDeleteRenderbuffers(1, &m_RBO);
+	glDeleteTextures(1, &m_textureID);
+	glDeleteVertexArrays(1, &m_VAO);
+	glDeleteBuffers(1, &m_VBO);
 }
 
 void PostProcessing::BeginRender()
@@ -124,15 +124,15 @@ void PostProcessing::InitializeTexture()
 
 void PostProcessing::InitializeVAO()
 {
-	GLfloat quad[] =
+	GLfloat quad[] = 
 	{
 		-1.0f, -1.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 1.0f,
-		-1.0f, 1.0f, 0.0f, 1.0f,
+		1.0f,  1.0f, 1.0f, 1.0f,
+		-1.0f,  1.0f, 0.0f, 1.0f,
 
 		-1.0f, -1.0f, 0.0f, 0.0f,
 		1.0f, -1.0f, 1.0f, 0.0f,
-		1.0f, 1.0f, 1.0f, 1.0f
+		1.0f,  1.0f, 1.0f, 1.0f
 	};
 
 	glGenVertexArrays(1, &m_VAO);
@@ -142,7 +142,7 @@ void PostProcessing::InitializeVAO()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), static_cast<GLvoid*>(nullptr));
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), static_cast<GLvoid*>(0));
 	glEnableVertexAttribArray(0);
 
 	glBindVertexArray(0);
@@ -172,8 +172,8 @@ void PostProcessing::InitializeShaderUniforms()
 	GLint edgeKernel[] =
 	{
 		-1, -1, -1,
-		-1, -8, -1,
-		-1, -8, -1
+		-1,  8, -1,
+		-1, -1, -1
 	};
 
 	m_shaderProgram->SetUniform("edgeKernel", 9, edgeKernel);
@@ -185,7 +185,7 @@ void PostProcessing::InitializeShaderUniforms()
 		1.0f / 16.0f, 2.0f / 16.0f, 1.0f / 16.0f
 	};
 
-	m_shaderProgram->SetUniform("blueKernel", 9, blurKernel);
+	m_shaderProgram->SetUniform("blurKernel", 9, blurKernel);
 
 	m_shaderProgram->End();
 }

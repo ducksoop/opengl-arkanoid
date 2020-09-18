@@ -6,6 +6,7 @@
 #include "ShaderType.h"
 #include "Window.h"
 #include "CollisionDetector.h"
+#include "Random.h"
 
 #include <GL/glew.h>
 #include <glm/mat4x4.hpp>
@@ -14,6 +15,7 @@
 #include <iostream>
 #include <utility>
 #include <tuple>
+#include <algorithm>
 
 namespace {
 	const glm::vec2 INITIAL_BALL_VELOCITY(250.0f, -350.0f);
@@ -77,6 +79,7 @@ void Game::HandleInput(GLfloat dt)
 
 void Game::Update(GLfloat dt)
 {
+	m_player->SetBoundaries(glm::vec2(0, m_window->GetWidth() - m_player->GetSize().x));
 	m_ball->Update(dt);
 	m_particleEmitter->Update(dt, *m_ball, 5, glm::vec2(m_ball->GetRadius() / 2));
 	CheckCollisions();
@@ -87,6 +90,14 @@ void Game::Update(GLfloat dt)
 		if (shakeTime <= 0.0f)
 			m_postProcessing->DisableEffects(PostProcessingEffect::Shake);
 	}
+
+	for (auto& pickUp : m_powerups)
+		pickUp->Update(dt, *m_player, *m_ball, *m_postProcessing);
+
+	m_powerups.erase(std::remove_if(m_powerups.begin(), m_powerups.end(), [](std::unique_ptr<Powerup> const& pickUp)
+	{
+		return pickUp->IsDestroyed() && !pickUp->IsActivated();
+	}), m_powerups.end());
 }
 
 void Game::Render()
@@ -104,8 +115,14 @@ void Game::Render()
 		m_particleEmitter->Render();
 		m_ball->Render(m_spriteRenderer);
 
+		for (auto& pickUp : m_powerups)
+		{
+			if (!pickUp->IsDestroyed())
+				pickUp->Render(m_spriteRenderer);
+		}
+
 		m_postProcessing->EndRender();
-		m_postProcessing->Render(glfwGetTime());
+		m_postProcessing->Render(static_cast<GLfloat>(glfwGetTime()));
 	}
 
 	m_window->SwapBuffers();
@@ -190,6 +207,24 @@ void Game::InitializeResources()
 	m_resourceManager.CreateTexture("particle",
 	                                "../res/textures/particle.png",
 	                                500, 500, 4, GL_RGBA);
+	m_resourceManager.CreateTexture("speedUp",
+	                                "../res/textures/powerups/powerup_speedup.png",
+	                                512, 128, 4, GL_RGBA);
+	m_resourceManager.CreateTexture("sticky",
+	                                "../res/textures/powerups/powerup_sticky.png",
+	                                512, 128, 4, GL_RGBA);
+	m_resourceManager.CreateTexture("passThrough",
+	                                "../res/textures/powerups/powerup_passthrough.png",
+	                                512, 128, 4, GL_RGBA);
+	m_resourceManager.CreateTexture("padSizeIncrease",
+	                                "../res/textures/powerups/powerup_increase.png",
+	                                512, 128, 4, GL_RGBA);
+	m_resourceManager.CreateTexture("confuse",
+	                                "../res/textures/powerups/powerup_confuse.png",
+	                                512, 128, 4, GL_RGBA);
+	m_resourceManager.CreateTexture("chaos",
+	                                "../res/textures/powerups/powerup_chaos.png",
+	                                512, 128, 4, GL_RGBA);
 
 	m_particleEmitter = std::make_unique<ParticleEmitter>(m_resourceManager.GetShaderProgram("particle"),
 	                                                      m_resourceManager.GetTexture("particle"),
@@ -242,15 +277,21 @@ void Game::CheckCollisions()
 			continue;
 
 		// There was no collision
-		Collision collision = CollisionDetector::CheckCollisionAABB(*m_ball, *brick);
+		Collision collision = CollisionDetector::CheckCollisionAABB_Circle(*m_ball, *brick);
 		if (!std::get<0>(collision))
 			continue;
 
 		if (!brick->IsSolid())
+		{
 			brick->SetIsDestroyed(true);
+			SpawnPowerups(*brick);
+		}
 
 		shakeTime = 0.2f;
 		m_postProcessing->EnableEffects(PostProcessingEffect::Shake);
+
+		if (m_ball->IsPassingThrough())
+			continue;
 
 		// Collision resolution
 		Direction direction = std::get<1>(collision);
@@ -287,7 +328,7 @@ void Game::CheckCollisions()
 	}
 
 	// Check collision with the paddle
-	Collision collision = CollisionDetector::CheckCollisionAABB(*m_ball, *m_player);
+	Collision collision = CollisionDetector::CheckCollisionAABB_Circle(*m_ball, *m_player);
 	if (std::get<0>(collision) && !m_ball->IsStuck())
 	{
 		// Check where it hit the board, and change the velocity based on where it hit
@@ -301,5 +342,67 @@ void Game::CheckCollisions()
 		m_ball->SetVelocityX(INITIAL_BALL_VELOCITY.x * percentage * strength);
 		m_ball->SetVelocityY(-1 * std::abs(m_ball->GetVelocity().y));
 		m_ball->SetVelocity(glm::normalize(m_ball->GetVelocity()) * glm::length(oldVelocity));
+
+		m_ball->SetIsStuck(m_ball->IsSticky());
+	}
+
+	// Check collision between powerups and the paddle
+	for (auto& powerup : m_powerups)
+	{
+		if (powerup->IsDestroyed())
+			continue;
+
+		if (powerup->GetPosition().y >= m_window->GetHeight())
+			powerup->SetIsDestroyed(true);
+
+		if (CollisionDetector::CheckCollisionAABB_AABB(*m_player, *powerup))
+			powerup->Activate(*m_player, *m_ball, *m_postProcessing);
+	}
+}
+
+void Game::SpawnPowerups(const Brick& brick)
+{
+	// Positive powerups (these spawn less frequently)
+	if (Random::Chance(50))
+	{
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(0.5f, 0.5f, 1.0f),
+		                                               m_resourceManager.GetTexture("speedUp"), PowerupType::SpeedUp,
+		                                               0.0f));
+	}
+
+	if (Random::Chance(50))
+	{
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(1.0f, 0.5f, 1.0f),
+			m_resourceManager.GetTexture("sticky"), PowerupType::Sticky,
+			20.0f));
+	}
+
+	if (Random::Chance(50))
+	{
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(1.0f, 0.5f, 1.0f),
+			m_resourceManager.GetTexture("passThrough"), PowerupType::PassThrough,
+			10.0f));
+	}
+
+	if (Random::Chance(50))
+	{
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(1.0f, 0.6f, 0.4f),
+			m_resourceManager.GetTexture("padSizeIncrease"), PowerupType::PaddleSizeIncrease,
+			0.0f));
+	}
+
+	// Negative powerups (spawn more frequently)
+	if (Random::Chance(15))
+	{
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(1.0, 0.3f, 0.3f),
+			m_resourceManager.GetTexture("confuse"), PowerupType::Confuse,
+			15.0f));
+	}
+
+	if (Random::Chance(15))
+	{
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(0.9f, 0.25f, 0.25f),
+			m_resourceManager.GetTexture("chaos"), PowerupType::Chaos,
+			15.0f));
 	}
 }

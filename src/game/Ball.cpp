@@ -8,6 +8,8 @@ Ball::Ball(const glm::vec2& position, float radius, const glm::vec3& color, Text
 	, m_velocity(velocity)
 	, m_radius(radius)
 	, m_isStuck(true)
+	, m_isSticky(false)
+	, m_isPassingThrough(false)
 	, m_boundaries(boundaries)
 {
 }
@@ -60,14 +62,39 @@ const glm::vec4& Ball::GetBoundaries() const
 	return m_boundaries;
 }
 
+bool Ball::IsSticky() const
+{
+	return m_isSticky;
+}
+
+bool Ball::IsPassingThrough() const
+{
+	return m_isPassingThrough;
+}
+
 void Ball::SetIsStuck(bool flag)
 {
 	m_isStuck = flag;
 }
 
+void Ball::SetIsSticky(bool flag)
+{
+	m_isSticky = flag;
+}
+
+void Ball::SetIsPassingThrough(bool flag)
+{
+	m_isPassingThrough = flag;
+}
+
 void Ball::SetVelocity(const glm::vec2& velocity)
 {
 	m_velocity = velocity;
+}
+
+void Ball::SetVelocity(float scale)
+{
+	m_velocity *= scale;
 }
 
 void Ball::SetVelocityX(float x)
