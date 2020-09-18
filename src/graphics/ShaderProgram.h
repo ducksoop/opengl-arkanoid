@@ -25,6 +25,16 @@ public:
 	void SetUniform(const std::string& name, glm::mat2 value);
 	void SetUniform(const std::string& name, glm::mat3 value);
 	void SetUniform(const std::string& name, glm::mat4 value);
+	void SetUniform(const std::string& name, GLsizei count, GLboolean* values);
+	void SetUniform(const std::string& name, GLsizei count, GLint* values);
+	void SetUniform(const std::string& name, GLsizei count, GLuint* values);
+	void SetUniform(const std::string& name, GLsizei count, GLfloat* values);
+	void SetUniform(const std::string& name, GLsizei count, glm::vec2* values);
+	void SetUniform(const std::string& name, GLsizei count, glm::vec3* values);
+	void SetUniform(const std::string& name, GLsizei count, glm::vec4* values);
+	void SetUniform(const std::string& name, GLsizei count, glm::mat2* values);
+	void SetUniform(const std::string& name, GLsizei count, glm::mat3* values);
+	void SetUniform(const std::string& name, GLsizei count, glm::mat4* values);
 	
 private:
 	ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);

@@ -18,6 +18,8 @@
 namespace {
 	const glm::vec2 INITIAL_BALL_VELOCITY(250.0f, -350.0f);
 	const float INITIAL_PLAYER_VELOCITY = 500.0f;
+
+	GLfloat shakeTime = 0.0f;
 }
 
 Game::Game(int w, int h, bool isFullscreen)
@@ -78,12 +80,21 @@ void Game::Update(GLfloat dt)
 	m_ball->Update(dt);
 	m_particleEmitter->Update(dt, *m_ball, 5, glm::vec2(m_ball->GetRadius() / 2));
 	CheckCollisions();
+
+	if (shakeTime > 0.0f)
+	{
+		shakeTime -= dt;
+		if (shakeTime <= 0.0f)
+			m_postProcessing->DisableEffects(PostProcessingEffect::Shake);
+	}
 }
 
 void Game::Render()
 {
 	if (m_gameState == GameState::GameActive) 
 	{
+		m_postProcessing->BeginRender();
+		
 		m_spriteRenderer.RenderSprite(m_resourceManager.GetTexture("background"),
 		                              glm::vec2(0.0f, 0.0f),
 		                              glm::vec2(m_window->GetWidth(), m_window->GetHeight()));
@@ -92,6 +103,9 @@ void Game::Render()
 		m_player->Render(m_spriteRenderer);
 		m_particleEmitter->Render();
 		m_ball->Render(m_spriteRenderer);
+
+		m_postProcessing->EndRender();
+		m_postProcessing->Render(glfwGetTime());
 	}
 
 	m_window->SwapBuffers();
@@ -127,31 +141,37 @@ void Game::InitializeOpenGL()
 
 void Game::InitializeResources()
 {
-	auto spriteShader = m_resourceManager.CreateShaderProgram("sprite",
-		Shader(ShaderType::Vertex,
-			"../res/shaders/sprite/shader.vert"),
-		Shader(ShaderType::Fragment,
-			"../res/shaders/sprite/shader.frag"));
+	auto* spriteShader = m_resourceManager.CreateShaderProgram("sprite",
+	                                                           Shader(Vertex,
+	                                                                  "../res/shaders/sprite/shader.vert"),
+	                                                           Shader(Fragment,
+	                                                                  "../res/shaders/sprite/shader.frag"));
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(m_window->GetWidth()),
-		static_cast<GLfloat>(m_window->GetHeight()), 0.0f,
-		-1.0f, 1.0f);
+	                                  static_cast<GLfloat>(m_window->GetHeight()), 0.0f,
+	                                  -1.0f, 1.0f);
 
 	spriteShader->Use();
 	spriteShader->SetUniform("projection", projection);
 	spriteShader->SetUniform("sprite", 0);
 
-	auto particleShader = m_resourceManager.CreateShaderProgram("particle",
-		Shader(ShaderType::Vertex,
-			"../res/shaders/particle/shader.vert"),
-		Shader(ShaderType::Fragment,
-			"../res/shaders/particle/shader.frag"));
+	m_spriteRenderer.Initialize(spriteShader);
+
+	auto* particleShader = m_resourceManager.CreateShaderProgram("particle",
+	                                                             Shader(Vertex,
+	                                                                    "../res/shaders/particle/shader.vert"),
+	                                                             Shader(Fragment,
+	                                                                    "../res/shaders/particle/shader.frag"));
 
 	particleShader->Use();
 	particleShader->SetUniform("projection", projection);
 	particleShader->SetUniform("sprite", 0);
 
-	m_spriteRenderer.Initialize(spriteShader);
-
+	m_resourceManager.CreateShaderProgram("postprocessing",
+	                                      Shader(Vertex,
+	                                             "../res/shaders/postprocessing/shader.vert"),
+	                                      Shader(Fragment,
+	                                             "../res/shaders/postprocessing/shader.frag"));
+	
 	m_resourceManager.CreateTexture("background",
 	                                "../res/textures/background.jpg",
 	                                1600, 900);
@@ -174,6 +194,8 @@ void Game::InitializeResources()
 	m_particleEmitter = std::make_unique<ParticleEmitter>(m_resourceManager.GetShaderProgram("particle"),
 	                                                      m_resourceManager.GetTexture("particle"),
 	                                                      500);
+	m_postProcessing = std::make_unique<PostProcessing>(m_resourceManager.GetShaderProgram("postprocessing"),
+	                                                    m_window->GetWidth(), m_window->GetHeight());
 
 	m_levels.push_back(std::make_unique<Level>(
 		"../res/levels/1.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
@@ -207,7 +229,7 @@ void Game::InitializeResources()
 	                                glm::vec3(1.0f),
 	                                m_resourceManager.GetTexture("face"),
 	                                INITIAL_BALL_VELOCITY,
-									glm::vec4(0.0f, m_window->GetWidth(), 0.0f, m_window->GetHeight())
+	                                glm::vec4(0.0f, m_window->GetWidth(), 0.0f, m_window->GetHeight())
 	);
 }
 
@@ -226,6 +248,9 @@ void Game::CheckCollisions()
 
 		if (!brick->IsSolid())
 			brick->SetIsDestroyed(true);
+
+		shakeTime = 0.2f;
+		m_postProcessing->EnableEffects(PostProcessingEffect::Shake);
 
 		// Collision resolution
 		Direction direction = std::get<1>(collision);

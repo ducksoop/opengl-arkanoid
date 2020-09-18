@@ -14,6 +14,7 @@
 #include "Direction.h"
 #include "Collision.h"
 #include "ParticleEmitter.h"
+#include "PostProcessing.h"
 
 #include <memory>
 #include <vector>
@@ -45,6 +46,7 @@ private:
 	std::unique_ptr<Paddle> m_player;
 	std::unique_ptr<Ball> m_ball;
 	std::unique_ptr<ParticleEmitter> m_particleEmitter;
+	std::unique_ptr<PostProcessing> m_postProcessing;
 
 	WindowManager& m_windowManager = WindowManager::Instance();
 	InputManager& m_inputManager = InputManager::Instance();
