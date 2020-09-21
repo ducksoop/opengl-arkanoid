@@ -30,14 +30,18 @@ Game::Game(int w, int h, bool isFullscreen)
 	m_windowManager.Initialize();
 	m_inputManager.Initialize();
 	m_resourceManager.Initialize();
+	m_audioManager.Initialize();
 	
 	InitializeWindow(w, h, isFullscreen);
 	InitializeOpenGL();
 	InitializeResources();
+
+	m_audioManager.PlayAudioSource("background");
 }
 
 Game::~Game()
 {
+	m_audioManager.Close();
 	m_resourceManager.Close();
 	m_inputManager.Close();
 	m_windowManager.Close();
@@ -226,6 +230,12 @@ void Game::InitializeResources()
 	                                "../res/textures/powerups/powerup_chaos.png",
 	                                512, 128, 4, GL_RGBA);
 
+	m_audioManager.CreateAudioSource("background", "../res/audio/background.ogg", true);
+	m_audioManager.CreateAudioSource("bleep", "../res/audio/bleep.ogg", false);
+	m_audioManager.CreateAudioSource("bleepPaddle", "../res/audio/bleep_paddle.ogg", false);
+	m_audioManager.CreateAudioSource("solid", "../res/audio/solid.ogg", false);
+	m_audioManager.CreateAudioSource("powerup", "../res/audio/powerup.ogg", false);
+
 	m_particleEmitter = std::make_unique<ParticleEmitter>(m_resourceManager.GetShaderProgram("particle"),
 	                                                      m_resourceManager.GetTexture("particle"),
 	                                                      500);
@@ -281,14 +291,18 @@ void Game::CheckCollisions()
 		if (!std::get<0>(collision))
 			continue;
 
-		if (!brick->IsSolid())
+		if (brick->IsSolid())
 		{
+			m_audioManager.PlayAudioSource("solid");
+			shakeTime = 0.2f;
+			m_postProcessing->EnableEffects(PostProcessingEffect::Shake);
+		}
+		else
+		{
+			m_audioManager.PlayAudioSource("bleep");
 			brick->SetIsDestroyed(true);
 			SpawnPowerups(*brick);
 		}
-
-		shakeTime = 0.2f;
-		m_postProcessing->EnableEffects(PostProcessingEffect::Shake);
 
 		if (m_ball->IsPassingThrough())
 			continue;
@@ -331,6 +345,8 @@ void Game::CheckCollisions()
 	Collision collision = CollisionDetector::CheckCollisionAABB_Circle(*m_ball, *m_player);
 	if (std::get<0>(collision) && !m_ball->IsStuck())
 	{
+		m_audioManager.PlayAudioSource("bleepPaddle");
+		
 		// Check where it hit the board, and change the velocity based on where it hit
 		float centerBoard = m_player->GetPosition().x + m_player->GetSize().x / 2;
 		float distance = (m_ball->GetPosition().x + m_ball->GetRadius()) - centerBoard;
@@ -356,7 +372,10 @@ void Game::CheckCollisions()
 			powerup->SetIsDestroyed(true);
 
 		if (CollisionDetector::CheckCollisionAABB_AABB(*m_player, *powerup))
+		{
+			m_audioManager.PlayAudioSource("powerup");
 			powerup->Activate(*m_player, *m_ball, *m_postProcessing);
+		}
 	}
 }
 

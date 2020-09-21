@@ -2,6 +2,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#include <stb_vorbis.c>
 
 #include <iostream>
 #include <fstream>
@@ -42,4 +43,17 @@ unsigned char* FileManager::ReadImage(const std::string& path, GLint width, GLin
 	}
 
 	return image;
+}
+
+AudioFile FileManager::ReadOggFile(const std::string& path) const
+{
+	AudioFile audioFile;
+	short* output;
+	audioFile.samples = stb_vorbis_decode_filename(path.c_str(),
+	                                               &audioFile.channels,
+	                                               &audioFile.sampleRate,
+	                                               &output);
+	audioFile.data = std::unique_ptr<short>(output);
+
+	return audioFile;
 }

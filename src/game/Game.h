@@ -7,6 +7,7 @@
 #include "ResourceManager.h"
 #include "InputManager.h"
 #include "WindowManager.h"
+#include "AudioManager.h"
 #include "Window.h"
 #include "Level.h"
 #include "Paddle.h"
@@ -54,4 +55,5 @@ private:
 	InputManager& m_inputManager = InputManager::Instance();
 	ResourceManager& m_resourceManager = ResourceManager::Instance();
 	SpriteRenderer& m_spriteRenderer = SpriteRenderer::Instance();
+	AudioManager& m_audioManager = AudioManager::Instance();
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Singleton.h"
+#include "AudioFile.h"
 
 #include <GL/glew.h>
 
@@ -15,6 +16,7 @@ public:
 	                         GLint height,
 	                         GLint channels,
 	                         bool flip = false) const;
+	AudioFile ReadOggFile(const std::string& path) const;
 	
 private:
 	FileManager() = default;
