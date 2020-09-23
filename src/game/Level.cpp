@@ -39,7 +39,7 @@ std::vector<std::vector<int>> Level::LoadTiles(const std::string& path)
 	std::vector<std::vector<int>> tiles;
 
 	int tile;
-	std::stringstream level(FileManager::Instance().ReadAsText(path));
+	std::stringstream level(FileManager::ReadAsText(path));
 	std::string line;
 
 	while (std::getline(level, line))

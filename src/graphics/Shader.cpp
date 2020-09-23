@@ -10,7 +10,7 @@
 
 Shader::Shader(ShaderType type, const std::string& path)
 {
-	const std::string source = FileManager::Instance().ReadAsText(path);
+	const std::string source = FileManager::ReadAsText(path);
 	
 	m_ID = glCreateShader(type);
 	

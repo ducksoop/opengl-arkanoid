@@ -8,7 +8,7 @@
 #include <fstream>
 #include <sstream>
 
-std::string FileManager::ReadAsText(const std::string& path) const
+std::string FileManager::ReadAsText(const std::string& path)
 {
 	std::string content;
 	std::ifstream file(path);
@@ -32,7 +32,7 @@ std::string FileManager::ReadAsText(const std::string& path) const
 	return content;
 }
 
-std::vector<unsigned char> FileManager::ReadAsBinary(const std::string& path) const
+std::vector<unsigned char> FileManager::ReadAsBinary(const std::string& path)
 {
 	std::ifstream file(path, std::ios::binary | std::ios::ate);
 	if (!file.is_open())
@@ -49,7 +49,7 @@ std::vector<unsigned char> FileManager::ReadAsBinary(const std::string& path) co
 	return bytes;
 }
 
-unsigned char* FileManager::ReadImage(const std::string& path, GLint width, GLint height, GLint channels, bool flip) const
+unsigned char* FileManager::ReadImage(const std::string& path, GLint width, GLint height, GLint channels, bool flip)
 {
 	stbi_set_flip_vertically_on_load(flip);
 	unsigned char* image = stbi_load(path.c_str(), &width, &height, &channels, 0);
@@ -62,7 +62,7 @@ unsigned char* FileManager::ReadImage(const std::string& path, GLint width, GLin
 	return image;
 }
 
-AudioFile FileManager::ReadOggFile(const std::string& path) const
+AudioFile FileManager::ReadOggFile(const std::string& path)
 {
 	AudioFile audioFile;
 	short* output;

@@ -63,7 +63,7 @@ void TextRenderer::Render(const std::string& text, const glm::vec2& position, co
 
 void TextRenderer::InitializeFont(const std::string& path)
 {
-	auto fontData = FileManager::Instance().ReadAsBinary(path);
+	auto fontData = FileManager::ReadAsBinary(path);
 	auto atlasData = std::vector<unsigned char>(m_font.ATLAS_WIDTH * m_font.ATLAS_HEIGHT);
 	m_font.charInfo = std::vector<stbtt_packedchar>(m_font.CHAR_COUNT);
 

@@ -44,7 +44,7 @@ ShaderProgram* ResourceManager::CreateShaderProgram(const std::string& name, con
 Texture* ResourceManager::CreateTexture(const std::string& name, const std::string& path, GLuint w, GLuint h,
 	GLint channels, GLuint format)
 {
-	unsigned char* image = FileManager::Instance().ReadImage(path, w, h, channels);
+	unsigned char* image = FileManager::ReadImage(path, w, h, channels);
 
 	m_textures[name] = std::unique_ptr<Texture>(
 		new Texture(w, h, image, format)
