@@ -7,6 +7,8 @@
 #include "Window.h"
 #include "CollisionDetector.h"
 #include "Random.h"
+#include "Constants.h"
+#include "AssetManager.h"
 
 #include <GL/glew.h>
 #include <glm/mat4x4.hpp>
@@ -174,11 +176,10 @@ void Game::InitializeOpenGL()
 
 void Game::InitializeResources()
 {
-	auto* spriteShader = m_resourceManager.CreateShaderProgram("sprite",
-	                                                           Shader(Vertex,
-	                                                                  "../res/shaders/sprite/shader.vert"),
-	                                                           Shader(Fragment,
-	                                                                  "../res/shaders/sprite/shader.frag"));
+	AssetManager::LoadShaders();
+
+	auto* spriteShader = m_resourceManager.GetShaderProgram("sprite");
+	
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(m_window->GetWidth()),
 	                                  static_cast<GLfloat>(m_window->GetHeight()), 0.0f,
 	                                  -1.0f, 1.0f);
@@ -189,21 +190,13 @@ void Game::InitializeResources()
 
 	m_spriteRenderer.Initialize(spriteShader);
 
-	auto* textRenderingShader = m_resourceManager.CreateShaderProgram("text",
-	                                                                  Shader(Vertex,
-	                                                                         "../res/shaders/text/shader.vert"),
-	                                                                  Shader(Fragment,
-	                                                                         "../res/shaders/text/shader.frag"));
+	auto* textRenderingShader = m_resourceManager.GetShaderProgram("text");
 
 	textRenderingShader->Use();
 	textRenderingShader->SetUniform("projection", projection);
-	m_textRenderer.Initialize("../res/fonts/manaspc.ttf", textRenderingShader);
+	m_textRenderer.Initialize(arkanoid::ASSETS_OFFSET + "res/fonts/manaspc.ttf", textRenderingShader);
 
-	auto* particleShader = m_resourceManager.CreateShaderProgram("particle",
-	                                                             Shader(Vertex,
-	                                                                    "../res/shaders/particle/shader.vert"),
-	                                                             Shader(Fragment,
-	                                                                    "../res/shaders/particle/shader.frag"));
+	auto* particleShader = m_resourceManager.GetShaderProgram("particle");
 
 	particleShader->Use();
 	particleShader->SetUniform("projection", projection);
@@ -214,49 +207,9 @@ void Game::InitializeResources()
 	                                             "../res/shaders/postprocessing/shader.vert"),
 	                                      Shader(Fragment,
 	                                             "../res/shaders/postprocessing/shader.frag"));
-	
-	m_resourceManager.CreateTexture("background",
-	                                "../res/textures/background.jpg",
-	                                1600, 900);
-	m_resourceManager.CreateTexture("face",
-	                                "../res/textures/awesome_face.png",
-	                                512, 512, 4, GL_RGBA);
-	m_resourceManager.CreateTexture("block",
-	                                "../res/textures/block.png",
-	                                128, 128);
-	m_resourceManager.CreateTexture("block_solid",
-	                                "../res/textures/block_solid.png",
-	                                128, 128);
-	m_resourceManager.CreateTexture("paddle",
-	                                "../res/textures/paddle.png",
-	                                512, 128, 4, GL_RGBA);
-	m_resourceManager.CreateTexture("particle",
-	                                "../res/textures/particle.png",
-	                                500, 500, 4, GL_RGBA);
-	m_resourceManager.CreateTexture("speedUp",
-	                                "../res/textures/powerups/powerup_speedup.png",
-	                                512, 128, 4, GL_RGBA);
-	m_resourceManager.CreateTexture("sticky",
-	                                "../res/textures/powerups/powerup_sticky.png",
-	                                512, 128, 4, GL_RGBA);
-	m_resourceManager.CreateTexture("passThrough",
-	                                "../res/textures/powerups/powerup_passthrough.png",
-	                                512, 128, 4, GL_RGBA);
-	m_resourceManager.CreateTexture("padSizeIncrease",
-	                                "../res/textures/powerups/powerup_increase.png",
-	                                512, 128, 4, GL_RGBA);
-	m_resourceManager.CreateTexture("confuse",
-	                                "../res/textures/powerups/powerup_confuse.png",
-	                                512, 128, 4, GL_RGBA);
-	m_resourceManager.CreateTexture("chaos",
-	                                "../res/textures/powerups/powerup_chaos.png",
-	                                512, 128, 4, GL_RGBA);
 
-	m_audioManager.CreateAudioSource("background", "../res/audio/background.ogg", true);
-	m_audioManager.CreateAudioSource("bleep", "../res/audio/bleep.ogg", false);
-	m_audioManager.CreateAudioSource("bleepPaddle", "../res/audio/bleep_paddle.ogg", false);
-	m_audioManager.CreateAudioSource("solid", "../res/audio/solid.ogg", false);
-	m_audioManager.CreateAudioSource("powerup", "../res/audio/powerup.ogg", false);
+	AssetManager::LoadTextures();
+	AssetManager::LoadAudioFiles();
 
 	m_particleEmitter = std::make_unique<ParticleEmitter>(m_resourceManager.GetShaderProgram("particle"),
 	                                                      m_resourceManager.GetTexture("particle"),
@@ -265,13 +218,13 @@ void Game::InitializeResources()
 	                                                    m_window->GetWidth(), m_window->GetHeight());
 
 	m_levels.push_back(std::make_unique<Level>(
-		"../res/levels/1.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
+		arkanoid::ASSETS_OFFSET + "res/levels/1.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_levels.push_back(std::make_unique<Level>(
-		"../res/levels/2.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
+		arkanoid::ASSETS_OFFSET + "res/levels/2.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_levels.push_back(std::make_unique<Level>(
-		"../res/levels/3.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
+		arkanoid::ASSETS_OFFSET + "res/levels/3.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_levels.push_back(std::make_unique<Level>(
-		"../res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
+		arkanoid::ASSETS_OFFSET + "res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_currentLevel = 3;
 
 	glm::vec2 playerSize = glm::vec2(150, 20) * m_scales;

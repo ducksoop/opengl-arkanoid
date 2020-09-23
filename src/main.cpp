@@ -3,9 +3,9 @@
 
 #include "Game.h"
 
-const int WIDTH = 1920;
-const int HEIGHT = 1080;
-const bool FULLSCREEN_ON = true;
+const int WIDTH = 800;
+const int HEIGHT = 600;
+const bool FULLSCREEN_ON = false;
 
 int main(int argc, char* argv[])
 {
