@@ -65,6 +65,9 @@ void SpriteRenderer::RenderSprite(const Texture* texture,
     glBindVertexArray(m_VAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+
+    m_shaderProgram->End();
+    texture->UnBind();
 }
 
 SpriteRenderer::SpriteRenderer()

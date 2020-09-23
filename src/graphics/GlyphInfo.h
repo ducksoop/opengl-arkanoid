@@ -4,8 +4,10 @@
 
 struct GlyphInfo
 {
-	glm::vec2 positions[2];
+	glm::vec2 size;
+	glm::vec2 bearing;
 	glm::vec2 uvs[2];
+	int advance;
 	float offsetX;
 	float offsetY;
 };

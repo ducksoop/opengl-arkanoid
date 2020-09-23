@@ -18,14 +18,17 @@
 #include <algorithm>
 
 namespace {
+	const int GAME_WIDTH = 960;
+	const int GAME_HEIGHT = 540;
 	const glm::vec2 INITIAL_BALL_VELOCITY(250.0f, -350.0f);
-	const float INITIAL_PLAYER_VELOCITY = 500.0f;
-
+	const float INITIAL_PLAYER_VELOCITY = 600.0f;
 	GLfloat shakeTime = 0.0f;
 }
 
 Game::Game(int w, int h, bool isFullscreen)
 	: m_gameState(GameState::GameActive)
+	, m_lives(3)
+	, m_scales(static_cast<float>(w) / GAME_WIDTH, static_cast<float>(h) / GAME_HEIGHT)
 {
 	m_windowManager.Initialize();
 	m_inputManager.Initialize();
@@ -88,6 +91,13 @@ void Game::Update(GLfloat dt)
 	m_particleEmitter->Update(dt, *m_ball, 5, glm::vec2(m_ball->GetRadius() / 2));
 	CheckCollisions();
 
+	if (m_ball->GetPosition().y >= m_window->GetHeight() - m_ball->GetSize().y)
+	{
+		m_lives--;
+
+		// Game over when lives are 0
+	}
+
 	if (shakeTime > 0.0f)
 	{
 		shakeTime -= dt;
@@ -116,7 +126,7 @@ void Game::Render()
 
 		m_levels[m_currentLevel]->Render(m_spriteRenderer);
 		m_player->Render(m_spriteRenderer);
-		m_particleEmitter->Render();
+		m_particleEmitter->Render(m_ball->GetRadius());
 		m_ball->Render(m_spriteRenderer);
 
 		for (auto& pickUp : m_powerups)
@@ -125,10 +135,10 @@ void Game::Render()
 				pickUp->Render(m_spriteRenderer);
 		}
 
-		m_textRenderer.Render("{} Segata Sanshiro. (!) 123-~,*", glm::vec2(50.0f, 50.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+		m_textRenderer.Render("Lives: " + std::to_string(m_lives), glm::vec2(10.0f, 30.0f) * m_scales, glm::vec3(1.0f, 1.0f, 1.0f), 0.6f * glm::length(m_scales));
 
 		m_postProcessing->EndRender();
-		m_postProcessing->Render(static_cast<GLfloat>(glfwGetTime()));
+		m_postProcessing->Render(static_cast<GLfloat>(glfwGetTime()), glm::length(m_scales));
 	}
 
 	m_window->SwapBuffers();
@@ -262,9 +272,9 @@ void Game::InitializeResources()
 		"../res/levels/3.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_levels.push_back(std::make_unique<Level>(
 		"../res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
-	m_currentLevel = 2;
+	m_currentLevel = 3;
 
-	glm::vec2 playerSize = glm::vec2(120, 20);
+	glm::vec2 playerSize = glm::vec2(150, 20) * m_scales;
 
 	glm::vec2 playerPosition = glm::vec2(
 		m_window->GetWidth() / 2 - playerSize.x / 2,
@@ -275,17 +285,17 @@ void Game::InitializeResources()
 	                                    playerSize,
 	                                    glm::vec3(1.0f),
 	                                    m_resourceManager.GetTexture("paddle"),
-	                                    INITIAL_PLAYER_VELOCITY,
+	                                    INITIAL_PLAYER_VELOCITY * m_scales.x,
 	                                    glm::vec2(0, m_window->GetWidth() - playerSize.x)
 	);
 
-	float ballRadius = 15.0f;
+	float ballRadius = 10.0f * glm::length(m_scales);
 	m_ball = std::make_unique<Ball>(playerPosition + glm::vec2(playerSize.x / 2 - ballRadius,
 	                                                           -2 * ballRadius),
 	                                ballRadius,
 	                                glm::vec3(1.0f),
 	                                m_resourceManager.GetTexture("face"),
-	                                INITIAL_BALL_VELOCITY,
+	                                INITIAL_BALL_VELOCITY * m_scales,
 	                                glm::vec4(0.0f, m_window->GetWidth(), 0.0f, m_window->GetHeight())
 	);
 }
@@ -367,7 +377,7 @@ void Game::CheckCollisions()
 		// Then move accordingly
 		float strength = 2.0f;
 		glm::vec2 oldVelocity = m_ball->GetVelocity();
-		m_ball->SetVelocityX(INITIAL_BALL_VELOCITY.x * percentage * strength);
+		m_ball->SetVelocityX(INITIAL_BALL_VELOCITY.x * m_scales.x * percentage * strength);
 		m_ball->SetVelocityY(-1 * std::abs(m_ball->GetVelocity().y));
 		m_ball->SetVelocity(glm::normalize(m_ball->GetVelocity()) * glm::length(oldVelocity));
 
@@ -386,54 +396,57 @@ void Game::CheckCollisions()
 		if (CollisionDetector::CheckCollisionAABB_AABB(*m_player, *powerup))
 		{
 			m_audioManager.PlayAudioSource("powerup");
-			powerup->Activate(*m_player, *m_ball, *m_postProcessing);
+			powerup->Activate(*m_player, *m_ball, *m_postProcessing, m_scales);
 		}
 	}
 }
 
 void Game::SpawnPowerups(const Brick& brick)
 {
+	const glm::vec2 size = glm::vec2(60, 20) * m_scales;
+	const glm::vec2 velocity = glm::vec2(0.0f, 150.0f) * m_scales;
+	
 	// Positive powerups (these spawn less frequently)
 	if (Random::Chance(50))
 	{
-		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(0.5f, 0.5f, 1.0f),
-		                                               m_resourceManager.GetTexture("speedUp"), PowerupType::SpeedUp,
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), size, glm::vec3(0.5f, 0.5f, 1.0f),
+		                                               m_resourceManager.GetTexture("speedUp"), velocity, PowerupType::SpeedUp,
 		                                               0.0f));
 	}
 
 	if (Random::Chance(50))
 	{
-		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(1.0f, 0.5f, 1.0f),
-			m_resourceManager.GetTexture("sticky"), PowerupType::Sticky,
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), size, glm::vec3(1.0f, 0.5f, 1.0f),
+			m_resourceManager.GetTexture("sticky"), velocity, PowerupType::Sticky,
 			20.0f));
 	}
 
 	if (Random::Chance(50))
 	{
-		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(1.0f, 0.5f, 1.0f),
-			m_resourceManager.GetTexture("passThrough"), PowerupType::PassThrough,
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), size, glm::vec3(1.0f, 0.5f, 1.0f),
+			m_resourceManager.GetTexture("passThrough"), velocity, PowerupType::PassThrough,
 			10.0f));
 	}
 
 	if (Random::Chance(50))
 	{
-		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(1.0f, 0.6f, 0.4f),
-			m_resourceManager.GetTexture("padSizeIncrease"), PowerupType::PaddleSizeIncrease,
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), size, glm::vec3(1.0f, 0.6f, 0.4f),
+			m_resourceManager.GetTexture("padSizeIncrease"), velocity, PowerupType::PaddleSizeIncrease,
 			0.0f));
 	}
 
 	// Negative powerups (spawn more frequently)
 	if (Random::Chance(15))
 	{
-		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(1.0, 0.3f, 0.3f),
-			m_resourceManager.GetTexture("confuse"), PowerupType::Confuse,
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), size, glm::vec3(1.0, 0.3f, 0.3f),
+			m_resourceManager.GetTexture("confuse"), velocity, PowerupType::Confuse,
 			15.0f));
 	}
 
 	if (Random::Chance(15))
 	{
-		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), glm::vec3(0.9f, 0.25f, 0.25f),
-			m_resourceManager.GetTexture("chaos"), PowerupType::Chaos,
+		m_powerups.push_back(std::make_unique<Powerup>(brick.GetPosition(), size, glm::vec3(0.9f, 0.25f, 0.25f),
+			m_resourceManager.GetTexture("chaos"), velocity, PowerupType::Chaos,
 			15.0f));
 	}
 }

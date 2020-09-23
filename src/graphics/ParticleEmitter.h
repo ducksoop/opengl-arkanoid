@@ -19,7 +19,7 @@ public:
 	            const Ball& object,
 	            int newParticles,
 	            glm::vec2 offset = glm::vec2(0.0f));
-	void Render();
+	void Render(float scale);
 	
 private:
 	GLuint GetFirstUnusedParticle();

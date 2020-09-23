@@ -33,6 +33,7 @@ private:
 	ShaderProgram* m_shaderProgram;
 	GLuint m_VAO;
 	GLuint m_VBO;
+	GLuint m_textureID;
 
 	Font m_font;
 

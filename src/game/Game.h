@@ -46,6 +46,8 @@ private:
 	std::vector<std::unique_ptr<Level>> m_levels;
 	std::vector<std::unique_ptr<Powerup>> m_powerups;
 	int m_currentLevel;
+	GLuint m_lives;
+	glm::vec2 m_scales;
 
 	std::unique_ptr<Paddle> m_player;
 	std::unique_ptr<Ball> m_ball;

@@ -44,10 +44,11 @@ void PostProcessing::EndRender()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void PostProcessing::Render(GLfloat delta)
+void PostProcessing::Render(GLfloat delta, GLfloat scale)
 {
 	m_shaderProgram->Use();
 	m_shaderProgram->SetUniform("time", delta);
+	m_shaderProgram->SetUniform("scale", scale);
 	m_shaderProgram->SetUniform("chaos", m_effects & PostProcessingEffect::Chaos);
 	m_shaderProgram->SetUniform("confuse", m_effects & PostProcessingEffect::Confuse);
 	m_shaderProgram->SetUniform("shake", m_effects & PostProcessingEffect::Shake);

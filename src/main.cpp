@@ -3,22 +3,21 @@
 
 #include "Game.h"
 
-const int WIDTH = 800;
-const int HEIGHT = 600;
-const bool FULLSCREEN_ON = false;
+const int WIDTH = 1920;
+const int HEIGHT = 1080;
+const bool FULLSCREEN_ON = true;
 
 int main(int argc, char* argv[])
 {
 	Game game(WIDTH, HEIGHT, FULLSCREEN_ON);
 
-	GLfloat delta;
-	GLfloat lastFrame = static_cast<GLfloat>(glfwGetTime());
+	auto lastFrame = static_cast<GLfloat>(glfwGetTime());
 
 	while (!game.IsExiting())
 	{
 		// Calculate delta time
-		GLfloat currentFrame = static_cast<GLfloat>(glfwGetTime());
-		delta = currentFrame - lastFrame;
+		const auto currentFrame = static_cast<GLfloat>(glfwGetTime());
+		const auto delta = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
 		game.HandleInput(delta);

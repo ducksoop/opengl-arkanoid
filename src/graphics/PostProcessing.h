@@ -19,7 +19,7 @@ public:
 	void EndRender();
 
 	// Renders the texture quad
-	void Render(GLfloat delta);
+	void Render(GLfloat delta, GLfloat scale);
 
 	void EnableEffects(int effects);
 	void DisableEffects(int effects);

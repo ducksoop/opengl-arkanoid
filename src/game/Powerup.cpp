@@ -1,17 +1,12 @@
 #include "Powerup.h"
 
-namespace {
-	const glm::vec2 SIZE(60, 20);
-	const glm::vec2 VELOCITY(0.0f, 150.0f);
-}
-
-Powerup::Powerup(const glm::vec2& position, const glm::vec3& color, Texture* sprite, PowerupType type, GLfloat duration)
-	: GameObject(position, SIZE, color, sprite)
+Powerup::Powerup(const glm::vec2& position, const glm::vec2& size, const glm::vec3& color, Texture* sprite, const glm::vec2& velocity, PowerupType type, GLfloat duration)
+	: GameObject(position, size, color, sprite)
 	, m_type(type)
 	, m_duration(duration)
 	, m_isActivated(false)
 	, m_isDestroyed(false)
-	, m_velocity(VELOCITY)
+	, m_velocity(velocity)
 {
 }
 
@@ -47,7 +42,7 @@ void Powerup::Update(float dt, Paddle& paddle, Ball& ball, PostProcessing& postP
 	}
 }
 
-void Powerup::Activate(Paddle& paddle, Ball& ball, PostProcessing& postProcessing)
+void Powerup::Activate(Paddle& paddle, Ball& ball, PostProcessing& postProcessing, const glm::vec2 scales)
 {
 	m_isActivated = true;
 	m_isDestroyed = true;
@@ -66,7 +61,7 @@ void Powerup::Activate(Paddle& paddle, Ball& ball, PostProcessing& postProcessin
 		ball.SetColor(glm::vec3(1.0f, 0.5f, 0.5f));
 		break;
 	case PowerupType::PaddleSizeIncrease:
-		paddle.UpdateSizeX(50);
+		paddle.UpdateSizeX(50 * scales.x);
 		break;
 	case PowerupType::Confuse:
 		postProcessing.EnableEffects(PostProcessingEffect::Confuse);

@@ -20,7 +20,7 @@ void TextRenderer::Render(const std::string& text, const glm::vec2& position, co
 	m_shaderProgram->SetUniform("textColor", color);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_font.textureID);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
 	glBindVertexArray(m_VAO);
 
 	GLfloat x = position.x;
@@ -29,8 +29,8 @@ void TextRenderer::Render(const std::string& text, const glm::vec2& position, co
 		auto glyph = m_glyphs[c];
 
 		// Update VBO for each character
-		GLfloat width = (glyph.positions[1].x - glyph.positions[0].x) * scale;
-		GLfloat height = (glyph.positions[1].y - glyph.positions[0].y) * scale;
+		GLfloat width = glyph.size.x * scale;
+		GLfloat height = glyph.size.y * scale;
 
 		GLfloat xPosition = x;
 		GLfloat yPosition = position.y;
@@ -80,8 +80,9 @@ void TextRenderer::InitializeFont(const std::string& path)
 
 	stbtt_PackEnd(&context);
 
-	glGenTextures(1, &m_font.textureID);
-	glBindTexture(GL_TEXTURE_2D, m_font.textureID);
+	glGenTextures(1, &m_textureID);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
+	
 	// Disable byte-alignment restriction
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_font.ATLAS_WIDTH, m_font.ATLAS_HEIGHT, 0,
@@ -108,7 +109,7 @@ void TextRenderer::InitializeGlyphs()
 
 	// Add more width to space it
 	auto glyph = m_glyphs['A'];
-	m_glyphs[' '].positions[1].x += glyph.positions[1].x - glyph.positions[0].x;
+	m_glyphs[' '].size.x += glyph.size.x;
 }
 
 void TextRenderer::InitializeVAO()
@@ -138,8 +139,7 @@ GlyphInfo TextRenderer::GetGlyphInfo(char character, float offsetX, float offset
 	auto info = GlyphInfo();
 	info.offsetX = offsetX;
 	info.offsetY = offsetY;
-	info.positions[0] = { quad.x0, quad.y0 };
-	info.positions[1] = { quad.x1, quad.y1 };
+	info.size = glm::vec2(quad.x1 - quad.x0, quad.y1 - quad.y0);
 	info.uvs[0] = { quad.s0, quad.t1 };
 	info.uvs[1] = { quad.s1, quad.t0 };
 
@@ -148,7 +148,7 @@ GlyphInfo TextRenderer::GetGlyphInfo(char character, float offsetX, float offset
 
 TextRenderer::~TextRenderer()
 {
-	glDeleteTextures(1, &m_font.textureID);
+	glDeleteTextures(1, &m_textureID);
 	glDeleteVertexArrays(1, &m_VAO);
 	glDeleteBuffers(1, &m_VBO);
 }
