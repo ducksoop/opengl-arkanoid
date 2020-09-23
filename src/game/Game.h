@@ -16,6 +16,7 @@
 #include "Collision.h"
 #include "ParticleEmitter.h"
 #include "PostProcessing.h"
+#include "TextRenderer.h"
 
 #include <memory>
 #include <vector>
@@ -56,4 +57,5 @@ private:
 	ResourceManager& m_resourceManager = ResourceManager::Instance();
 	SpriteRenderer& m_spriteRenderer = SpriteRenderer::Instance();
 	AudioManager& m_audioManager = AudioManager::Instance();
+	TextRenderer& m_textRenderer = TextRenderer::Instance();
 };

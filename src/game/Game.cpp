@@ -125,6 +125,8 @@ void Game::Render()
 				pickUp->Render(m_spriteRenderer);
 		}
 
+		m_textRenderer.Render("{} Segata Sanshiro. (!) 123-~,*", glm::vec2(50.0f, 50.0f), glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
+
 		m_postProcessing->EndRender();
 		m_postProcessing->Render(static_cast<GLfloat>(glfwGetTime()));
 	}
@@ -176,6 +178,16 @@ void Game::InitializeResources()
 	spriteShader->SetUniform("sprite", 0);
 
 	m_spriteRenderer.Initialize(spriteShader);
+
+	auto* textRenderingShader = m_resourceManager.CreateShaderProgram("text",
+	                                                                  Shader(Vertex,
+	                                                                         "../res/shaders/text/shader.vert"),
+	                                                                  Shader(Fragment,
+	                                                                         "../res/shaders/text/shader.frag"));
+
+	textRenderingShader->Use();
+	textRenderingShader->SetUniform("projection", projection);
+	m_textRenderer.Initialize("../res/fonts/manaspc.ttf", textRenderingShader);
 
 	auto* particleShader = m_resourceManager.CreateShaderProgram("particle",
 	                                                             Shader(Vertex,
@@ -250,7 +262,7 @@ void Game::InitializeResources()
 		"../res/levels/3.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_levels.push_back(std::make_unique<Level>(
 		"../res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
-	m_currentLevel = 0;
+	m_currentLevel = 2;
 
 	glm::vec2 playerSize = glm::vec2(120, 20);
 

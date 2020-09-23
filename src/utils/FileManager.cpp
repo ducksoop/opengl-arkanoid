@@ -32,6 +32,23 @@ std::string FileManager::ReadAsText(const std::string& path) const
 	return content;
 }
 
+std::vector<unsigned char> FileManager::ReadAsBinary(const std::string& path) const
+{
+	std::ifstream file(path, std::ios::binary | std::ios::ate);
+	if (!file.is_open())
+	{
+		std::cerr << "Unable to open font file: " << path << std::endl;
+	}
+
+	auto size = file.tellg();
+	auto bytes = std::vector<unsigned char>(size);
+	file.seekg(0, std::ios::beg);
+	file.read(reinterpret_cast<char*>(&bytes.front()), size);
+	file.close();
+
+	return bytes;
+}
+
 unsigned char* FileManager::ReadImage(const std::string& path, GLint width, GLint height, GLint channels, bool flip) const
 {
 	stbi_set_flip_vertically_on_load(flip);

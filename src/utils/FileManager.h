@@ -6,11 +6,13 @@
 #include <GL/glew.h>
 
 #include <string>
+#include <vector>
 
 class FileManager : public Singleton<FileManager>
 {
 public:
 	std::string ReadAsText(const std::string& path) const;
+	std::vector<unsigned char> ReadAsBinary(const std::string& path) const;
 	unsigned char* ReadImage(const std::string& path,
 	                         GLint width,
 	                         GLint height,
