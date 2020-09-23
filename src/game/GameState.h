@@ -3,5 +3,7 @@
 enum class GameState
 {
 	GameMenu,
-	GameActive
+	GameActive,
+	GameWin,
+	GameLose
 };

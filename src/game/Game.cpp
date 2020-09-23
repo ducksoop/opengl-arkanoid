@@ -24,7 +24,7 @@ namespace {
 	const int GAME_HEIGHT = 540;
 	const glm::vec2 INITIAL_BALL_VELOCITY(250.0f, -350.0f);
 	const float INITIAL_PLAYER_VELOCITY = 600.0f;
-	const int LIVES = 3;
+	const int LIVES = 5;
 	const float BALL_RADIUS = 10.0f;
 	const glm::vec2 PLAYER_SIZE = glm::vec2(150, 20);
 	
@@ -64,6 +64,7 @@ void Game::HandleInput(GLfloat dt)
 	{
 		if (m_inputManager.IsKeyPressed(GLFW_KEY_ENTER) && !m_inputManager.IsKeyProcessed(GLFW_KEY_ENTER))
 		{
+			m_inputManager.SetProcessedKey(GLFW_KEY_ENTER);
 			m_gameState = GameState::GameActive;
 		}
 		else if (m_inputManager.IsKeyPressed(GLFW_KEY_W) && !m_inputManager.IsKeyProcessed(GLFW_KEY_W))
@@ -116,6 +117,14 @@ void Game::HandleInput(GLfloat dt)
 			m_ball->SetIsStuck(false);
 		}
 	}
+	else if (m_gameState == GameState::GameWin || m_gameState == GameState::GameLose)
+	{
+		if (m_inputManager.IsKeyPressed(GLFW_KEY_ENTER) && !m_inputManager.IsKeyProcessed(GLFW_KEY_ENTER))
+		{
+			m_inputManager.SetProcessedKey(GLFW_KEY_ENTER);
+			m_gameState = GameState::GameMenu;
+		}
+	}
 }
 
 void Game::Update(GLfloat dt)
@@ -123,19 +132,7 @@ void Game::Update(GLfloat dt)
 	m_player->SetBoundaries(glm::vec2(0, m_window->GetWidth() - m_player->GetSize().x));
 	m_ball->Update(dt);
 	m_particleEmitter->Update(dt, *m_ball, 5, glm::vec2(m_ball->GetRadius() / 2));
-	CheckCollisions();
-
-	if (m_ball->GetPosition().y >= m_window->GetHeight() - m_ball->GetSize().y)
-	{
-		m_lives--;
-
-		// Game over when lives are 0
-		if (m_lives < 0)
-		{
-			Reset();
-			m_gameState = GameState::GameMenu;
-		}
-	}
+	CheckCollisions();	
 
 	if (shakeTime > 0.0f)
 	{
@@ -151,11 +148,29 @@ void Game::Update(GLfloat dt)
 	{
 		return pickUp->IsDestroyed() && !pickUp->IsActivated();
 	}), m_powerups.end());
+
+	if (m_gameState == GameState::GameActive && m_levels[m_currentLevel]->IsCleared())
+	{
+		Reset();
+		m_gameState = GameState::GameWin;
+	}
+
+	if (m_ball->GetPosition().y >= m_window->GetHeight() - m_ball->GetSize().y)
+	{
+		m_lives--;
+
+		// Game over when lives are 0
+		if (m_lives < 0)
+		{
+			Reset();
+			m_gameState = GameState::GameLose;
+		}
+	}
 }
 
 void Game::Render()
 {
-	if (m_gameState == GameState::GameMenu || m_gameState == GameState::GameActive) 
+	if (m_gameState == GameState::GameActive || m_gameState == GameState::GameMenu) 
 	{
 		m_postProcessing->BeginRender();
 		
@@ -172,18 +187,37 @@ void Game::Render()
 		{
 			if (!pickUp->IsDestroyed())
 				pickUp->Render(m_spriteRenderer);
-		}
-
-		m_textRenderer.Render("Lives: " + std::to_string(m_lives), glm::vec2(10.0f, 30.0f) * m_scales, glm::vec3(1.0f), 0.6f * glm::length(m_scales));
-
-		m_postProcessing->EndRender();
-		m_postProcessing->Render(static_cast<GLfloat>(glfwGetTime()), glm::length(m_scales));
+		}		
 	}
+
+	m_textRenderer.Render("Lives: " + std::to_string(m_lives), glm::vec2(10.0f, 30.0f) * m_scales, glm::vec3(1.0f), 0.6f * glm::length(m_scales));
+
+	m_postProcessing->EndRender();
+	m_postProcessing->Render(static_cast<GLfloat>(glfwGetTime()), glm::length(m_scales));
 
 	if (m_gameState == GameState::GameMenu)
 	{
+		m_postProcessing->DisableEffects(PostProcessingEffect::Chaos);
 		m_textRenderer.Render("Press Enter to Start!", glm::vec2(GAME_WIDTH / 2 - 165, GAME_HEIGHT / 2) * m_scales, glm::vec3(1.0f), 0.6f * glm::length(m_scales));
 		m_textRenderer.Render("Press W or S to select level", glm::vec2(GAME_WIDTH / 2 - 155, GAME_HEIGHT / 2 + 20) * m_scales, glm::vec3(1.0f), 0.4f * glm::length(m_scales));
+	}
+	else if (m_gameState == GameState::GameWin) 
+	{
+		m_textRenderer.Render("You WON!!!",
+			glm::vec2(GAME_WIDTH / 2 - 80, GAME_HEIGHT / 2) * m_scales,
+			glm::vec3(0.0f, 1.0f, 0.0f), 0.7f * glm::length(m_scales));
+		m_textRenderer.Render("Press ENTER to retry or ESC to quit",
+			glm::vec2(GAME_WIDTH / 2 - 180, GAME_HEIGHT / 2 + 20) * m_scales,
+			glm::vec3(1.0f, 1.0f, 0.0f), 0.4f * glm::length(m_scales));
+	}
+	else if (m_gameState == GameState::GameLose) 
+	{
+		m_textRenderer.Render("You LOST...",
+			glm::vec2(GAME_WIDTH / 2 - 80, GAME_HEIGHT / 2) * m_scales,
+			glm::vec3(1.0f, 0.0f, 0.0f), 0.7f * glm::length(m_scales));
+		m_textRenderer.Render("Press ENTER to retry or ESC to quit",
+			glm::vec2(GAME_WIDTH / 2 - 180, GAME_HEIGHT / 2 + 20) * m_scales,
+			glm::vec3(1.0f, 1.0f, 0.0f), 0.4f * glm::length(m_scales));
 	}
 
 	m_window->SwapBuffers();
