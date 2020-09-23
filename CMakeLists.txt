@@ -6,6 +6,7 @@ find_package(OpenGL REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -static")
 
 include_directories(
+  "src/audio"
   "src/graphics"
   "src/game"
   "src/input"
@@ -14,6 +15,8 @@ include_directories(
 )
 
 file(GLOB SOURCES 
+  "src/audio/*.h"
+  "src/audio/*.cpp"
   "src/game/*.cpp"
   "src/game/*.h"
   "src/graphics/*.cpp"
