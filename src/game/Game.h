@@ -31,7 +31,8 @@ public:
 	void Update(GLfloat dt);
 	void Render();
 
-	bool IsExiting();
+	bool IsExiting() const;
+	void Reset();
 	
 private:
 	void InitializeWindow(int w, int h, bool isFullscreen);
@@ -45,8 +46,8 @@ private:
 	Window* m_window;
 	std::vector<std::unique_ptr<Level>> m_levels;
 	std::vector<std::unique_ptr<Powerup>> m_powerups;
-	int m_currentLevel;
-	GLuint m_lives;
+	GLint m_currentLevel;
+	GLint m_lives;
 	glm::vec2 m_scales;
 
 	std::unique_ptr<Paddle> m_player;

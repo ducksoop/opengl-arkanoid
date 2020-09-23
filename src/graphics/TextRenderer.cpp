@@ -22,8 +22,10 @@ void TextRenderer::Render(const std::string& text, const glm::vec2& position, co
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 	glBindVertexArray(m_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
 	GLfloat x = position.x;
+	int i = 0;
 
 	for (auto c : text) {
 		auto glyph = m_glyphs[c];
@@ -45,15 +47,16 @@ void TextRenderer::Render(const std::string& text, const glm::vec2& position, co
 			xPosition + width, yPosition - height, glyph.uvs[1].x, glyph.uvs[1].y,
 		};
 
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertices) * i, sizeof(vertices), vertices);
+
 		x += width;
-
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		// Render quad
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		i++;
 	}
+
+	// Render quads
+	glDrawArrays(GL_TRIANGLES, 0, 6 * text.length());
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -120,7 +123,7 @@ void TextRenderer::InitializeVAO()
 	glBindVertexArray(m_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4 * m_font.CHAR_COUNT, nullptr, GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), static_cast<GLvoid*>(nullptr));

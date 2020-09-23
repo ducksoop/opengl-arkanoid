@@ -13,6 +13,7 @@ public:
 	~Level() = default;
 
 	void Render(SpriteRenderer& renderer);
+	void Reset();
 	bool IsCleared();
 
 	std::vector<std::unique_ptr<Brick>>& GetBricks();

@@ -24,12 +24,16 @@ namespace {
 	const int GAME_HEIGHT = 540;
 	const glm::vec2 INITIAL_BALL_VELOCITY(250.0f, -350.0f);
 	const float INITIAL_PLAYER_VELOCITY = 600.0f;
+	const int LIVES = 3;
+	const float BALL_RADIUS = 10.0f;
+	const glm::vec2 PLAYER_SIZE = glm::vec2(150, 20);
+	
 	GLfloat shakeTime = 0.0f;
 }
 
 Game::Game(int w, int h, bool isFullscreen)
-	: m_gameState(GameState::GameActive)
-	, m_lives(3)
+	: m_gameState(GameState::GameMenu)
+	, m_lives(LIVES)
 	, m_scales(static_cast<float>(w) / GAME_WIDTH, static_cast<float>(h) / GAME_HEIGHT)
 {
 	m_windowManager.Initialize();
@@ -55,34 +59,62 @@ Game::~Game()
 void Game::HandleInput(GLfloat dt)
 {
 	m_inputManager.ProcessEvents(dt);
-	float velocity = m_player->GetVelocity() * dt;
 
-	if (m_inputManager.IsKeyPressed(GLFW_KEY_A) || m_inputManager.IsKeyPressed(GLFW_KEY_LEFT))
+	if (m_gameState == GameState::GameMenu)
 	{
-		if (m_player->GetPosition().x >= m_player->GetBoundaries().x)
+		if (m_inputManager.IsKeyPressed(GLFW_KEY_ENTER) && !m_inputManager.IsKeyProcessed(GLFW_KEY_ENTER))
 		{
-			m_player->UpdatePositionX(-velocity);
-			if (m_ball->IsStuck())
+			m_gameState = GameState::GameActive;
+		}
+		else if (m_inputManager.IsKeyPressed(GLFW_KEY_W) && !m_inputManager.IsKeyProcessed(GLFW_KEY_W))
+		{
+			m_inputManager.SetProcessedKey(GLFW_KEY_W);
+			m_currentLevel = (m_currentLevel + 1) % m_levels.size();
+		}
+		else if (m_inputManager.IsKeyPressed(GLFW_KEY_S) && !m_inputManager.IsKeyProcessed(GLFW_KEY_S))
+		{
+			m_inputManager.SetProcessedKey(GLFW_KEY_S);
+			if (m_currentLevel > 0)
 			{
-				m_ball->UpdatePositionX(-velocity);
+				m_currentLevel--;
+			}
+			else
+			{
+				m_currentLevel = m_levels.size() - 1;
 			}
 		}
 	}
-	if (m_inputManager.IsKeyPressed(GLFW_KEY_D) || m_inputManager.IsKeyPressed(GLFW_KEY_RIGHT))
+	else if (m_gameState == GameState::GameActive)
 	{
-		if (m_player->GetPosition().x <= m_player->GetBoundaries().y)
+		float velocity = m_player->GetVelocity() * dt;
+
+		if (m_inputManager.IsKeyPressed(GLFW_KEY_A) || m_inputManager.IsKeyPressed(GLFW_KEY_LEFT))
 		{
-			m_player->UpdatePositionX(velocity);
-			if (m_ball->IsStuck())
+			if (m_player->GetPosition().x >= m_player->GetBoundaries().x)
 			{
-				m_ball->UpdatePositionX(velocity);
+				m_player->UpdatePositionX(-velocity);
+				if (m_ball->IsStuck())
+				{
+					m_ball->UpdatePositionX(-velocity);
+				}
 			}
 		}
-	}
+		if (m_inputManager.IsKeyPressed(GLFW_KEY_D) || m_inputManager.IsKeyPressed(GLFW_KEY_RIGHT))
+		{
+			if (m_player->GetPosition().x <= m_player->GetBoundaries().y)
+			{
+				m_player->UpdatePositionX(velocity);
+				if (m_ball->IsStuck())
+				{
+					m_ball->UpdatePositionX(velocity);
+				}
+			}
+		}
 
-	if (m_inputManager.IsKeyPressed(GLFW_KEY_SPACE))
-	{
-		m_ball->SetIsStuck(false);
+		if (m_inputManager.IsKeyPressed(GLFW_KEY_SPACE))
+		{
+			m_ball->SetIsStuck(false);
+		}
 	}
 }
 
@@ -98,6 +130,11 @@ void Game::Update(GLfloat dt)
 		m_lives--;
 
 		// Game over when lives are 0
+		if (m_lives < 0)
+		{
+			Reset();
+			m_gameState = GameState::GameMenu;
+		}
 	}
 
 	if (shakeTime > 0.0f)
@@ -118,7 +155,7 @@ void Game::Update(GLfloat dt)
 
 void Game::Render()
 {
-	if (m_gameState == GameState::GameActive) 
+	if (m_gameState == GameState::GameMenu || m_gameState == GameState::GameActive) 
 	{
 		m_postProcessing->BeginRender();
 		
@@ -137,18 +174,55 @@ void Game::Render()
 				pickUp->Render(m_spriteRenderer);
 		}
 
-		m_textRenderer.Render("Lives: " + std::to_string(m_lives), glm::vec2(10.0f, 30.0f) * m_scales, glm::vec3(1.0f, 1.0f, 1.0f), 0.6f * glm::length(m_scales));
+		m_textRenderer.Render("Lives: " + std::to_string(m_lives), glm::vec2(10.0f, 30.0f) * m_scales, glm::vec3(1.0f), 0.6f * glm::length(m_scales));
 
 		m_postProcessing->EndRender();
 		m_postProcessing->Render(static_cast<GLfloat>(glfwGetTime()), glm::length(m_scales));
 	}
 
+	if (m_gameState == GameState::GameMenu)
+	{
+		m_textRenderer.Render("Press Enter to Start!", glm::vec2(GAME_WIDTH / 2 - 165, GAME_HEIGHT / 2) * m_scales, glm::vec3(1.0f), 0.6f * glm::length(m_scales));
+		m_textRenderer.Render("Press W or S to select level", glm::vec2(GAME_WIDTH / 2 - 155, GAME_HEIGHT / 2 + 20) * m_scales, glm::vec3(1.0f), 0.4f * glm::length(m_scales));
+	}
+
 	m_window->SwapBuffers();
 }
 
-bool Game::IsExiting()
+bool Game::IsExiting() const
 {
 	return m_window->IsClosing();
+}
+
+void Game::Reset()
+{
+	m_levels[m_currentLevel]->Reset();
+
+	auto playerSize = PLAYER_SIZE * m_scales;
+	auto playerPosition = glm::vec2(
+		m_window->GetWidth() / 2 - playerSize.x / 2,
+		m_window->GetHeight() - playerSize.y
+	);
+
+	m_player->SetSize(playerSize);
+	m_player->SetPosition(playerPosition);
+	m_player->SetColor(glm::vec3(1.0f));
+
+	auto ballRadius = BALL_RADIUS * glm::length(m_scales);
+	m_ball->SetPosition(playerPosition + glm::vec2(playerSize.x / 2 - ballRadius, -2 * ballRadius));
+	m_ball->SetColor(glm::vec3(1.0f));
+	m_ball->SetVelocity(INITIAL_BALL_VELOCITY * m_scales);
+	m_ball->SetIsStuck(true);
+	m_ball->SetIsSticky(false);
+	m_ball->SetIsPassingThrough(false);
+
+	m_postProcessing->DisableEffects(PostProcessingEffect::Chaos |
+									 PostProcessingEffect::Confuse |
+									 PostProcessingEffect::Shake);
+
+	m_powerups.clear();
+
+	m_lives = LIVES;
 }
 
 void Game::InitializeWindow(int w, int h, bool isFullscreen)
@@ -225,7 +299,7 @@ void Game::InitializeResources()
 		arkanoid::ASSETS_OFFSET + "res/levels/3.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_levels.push_back(std::make_unique<Level>(
 		arkanoid::ASSETS_OFFSET + "res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
-	m_currentLevel = 3;
+	m_currentLevel = 0;
 
 	glm::vec2 playerSize = glm::vec2(150, 20) * m_scales;
 
@@ -242,7 +316,7 @@ void Game::InitializeResources()
 	                                    glm::vec2(0, m_window->GetWidth() - playerSize.x)
 	);
 
-	float ballRadius = 10.0f * glm::length(m_scales);
+	float ballRadius = BALL_RADIUS * glm::length(m_scales);
 	m_ball = std::make_unique<Ball>(playerPosition + glm::vec2(playerSize.x / 2 - ballRadius,
 	                                                           -2 * ballRadius),
 	                                ballRadius,

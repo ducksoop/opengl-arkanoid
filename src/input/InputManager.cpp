@@ -33,6 +33,7 @@ void InputManager::ProcessKeyEvent(int key, int scanCode, int action, int mods)
 	else if (action == GLFW_RELEASE)
 	{
 		m_keys[key] = false;
+		m_processedKeys[key] = false;
 	}
 }
 
@@ -49,4 +50,14 @@ void InputManager::RemoveKeyHandler(const std::string& name)
 bool InputManager::IsKeyPressed(int key)
 {
 	return m_keys[key];
+}
+
+bool InputManager::IsKeyProcessed(int key)
+{
+	return m_processedKeys[key];
+}
+
+void InputManager::SetProcessedKey(int key)
+{
+	m_processedKeys[key] = true;
 }

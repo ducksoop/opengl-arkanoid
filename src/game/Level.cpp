@@ -24,9 +24,19 @@ void Level::Render(SpriteRenderer& renderer)
 	}
 }
 
+void Level::Reset()
+{
+	for (auto& brick : m_bricks)
+		brick->SetIsDestroyed(false);
+}
+
 bool Level::IsCleared()
 {
-	return false;
+	for (auto& brick : m_bricks)
+		if (!brick->IsSolid() && !brick->IsDestroyed())
+			return false;
+
+	return true;
 }
 
 std::vector<std::unique_ptr<Brick>>& Level::GetBricks()
