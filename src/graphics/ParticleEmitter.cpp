@@ -94,7 +94,7 @@ void ParticleEmitter::Render(float scale)
 GLuint ParticleEmitter::GetFirstUnusedParticle()
 {
 	// Search from last used particle
-	for (GLuint i = m_lastUnusedParticle; i < m_amount; i++)
+	for (auto i = m_lastUnusedParticle; i < m_amount; i++)
 	{
 		if (m_particles[i].lifespan <= 0.0f)
 		{
@@ -120,8 +120,8 @@ GLuint ParticleEmitter::GetFirstUnusedParticle()
 
 void ParticleEmitter::RespawnParticle(Particle& particle, const Ball& object, const glm::vec2& offset)
 {
-	GLfloat random = ((rand() % 100) - 50) / 10.0f;
-	GLfloat color = static_cast<GLfloat>(0.5) + ((rand() % 100) / 100.0f);
+	auto random = ((rand() % 100) - 50) / 10.0f;
+	auto color = static_cast<GLfloat>(0.5) + ((rand() % 100) / 100.0f);
 	particle.position = object.GetPosition() + random + offset;
 	particle.color = glm::vec4(color, color, color, 1.0f);
 	particle.lifespan = 1.0f;

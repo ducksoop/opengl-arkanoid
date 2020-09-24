@@ -15,7 +15,7 @@ public:
 	GLuint GetID() const;
 	
 private:
-	void CheckCompilationStatus();
+	void CheckCompilationStatus() const;
 	
 	GLuint m_ID;
 };

@@ -10,11 +10,11 @@
 
 Shader::Shader(ShaderType type, const std::string& path)
 {
-	const std::string source = FileManager::ReadAsText(path);
+	const auto source = FileManager::ReadAsText(path);
 	
 	m_ID = glCreateShader(type);
-	
-	const GLchar* shaderSource = source.c_str();
+
+	auto shaderSource = source.c_str();
 	glShaderSource(m_ID, 1, &shaderSource, nullptr);
 	glCompileShader(m_ID);
 
@@ -31,7 +31,7 @@ GLuint Shader::GetID() const
 	return m_ID;
 }
 
-void Shader::CheckCompilationStatus()
+void Shader::CheckCompilationStatus() const
 {
 	GLint success;
 	glGetShaderiv(m_ID, GL_COMPILE_STATUS, &success);

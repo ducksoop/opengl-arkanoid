@@ -13,13 +13,13 @@ public:
 	~PostProcessing();
 
 	// Prepares the framebuffer operations before rendering the game
-	void BeginRender();
+	void BeginRender() const;
 
 	// Should be called after rendering the game, sores all the rendered data into a texture object
-	void EndRender();
+	void EndRender() const;
 
 	// Renders the texture quad
-	void Render(GLfloat delta, GLfloat scale);
+	void Render(GLfloat delta, GLfloat scale) const;
 
 	void EnableEffects(int effects);
 	void DisableEffects(int effects);
@@ -28,7 +28,7 @@ private:
 	void InitializeFBOs();
 	void InitializeTexture();
 	void InitializeVAO();
-	void InitializeShaderUniforms();
+	void InitializeShaderUniforms() const;
 	
 	ShaderProgram* m_shaderProgram;
 	Texture* m_texture;

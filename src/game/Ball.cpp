@@ -1,7 +1,5 @@
 #include "Ball.h"
 
-#include <iostream>
-
 Ball::Ball(const glm::vec2& position, float radius, const glm::vec3& color, Texture* sprite,
 	const glm::vec2& velocity, const glm::vec4& boundaries)
 	: GameObject(position, glm::vec2(2 * radius), color, sprite)

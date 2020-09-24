@@ -26,14 +26,14 @@ PostProcessing::~PostProcessing()
 	glDeleteBuffers(1, &m_VBO);
 }
 
-void PostProcessing::BeginRender()
+void PostProcessing::BeginRender() const
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, m_MSFBO);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void PostProcessing::EndRender()
+void PostProcessing::EndRender() const
 {
 	// Resolve multi-sampled color-buffer into intermediate FBO to store texture
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_MSFBO);
@@ -44,7 +44,7 @@ void PostProcessing::EndRender()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void PostProcessing::Render(GLfloat delta, GLfloat scale)
+void PostProcessing::Render(GLfloat delta, GLfloat scale) const
 {
 	m_shaderProgram->Use();
 	m_shaderProgram->SetUniform("time", delta);
@@ -149,12 +149,12 @@ void PostProcessing::InitializeVAO()
 	glBindVertexArray(0);
 }
 
-void PostProcessing::InitializeShaderUniforms()
+void PostProcessing::InitializeShaderUniforms() const
 {
 	m_shaderProgram->Use();
 	m_shaderProgram->SetUniform("scene", 0);
 
-	GLfloat offset = 1.0f / 300.0f;
+	auto offset = 1.0f / 300.0f;
 	glm::vec2 offsets[] =
 	{
 		{ -offset, offset },	// Top-left

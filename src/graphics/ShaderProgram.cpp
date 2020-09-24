@@ -29,7 +29,7 @@ ShaderProgram::~ShaderProgram()
 	
 }
 
-void ShaderProgram::Use()
+void ShaderProgram::Use() const
 {
 	glUseProgram(m_ID);
 }
@@ -140,7 +140,7 @@ void ShaderProgram::SetUniform(const std::string& name, GLsizei count, const glm
 	glUniformMatrix4fv(GetUniformLocation(name), count, GL_FALSE, &values[0][0].x);
 }
 
-void ShaderProgram::CheckLinkageStatus()
+void ShaderProgram::CheckLinkageStatus() const
 {
 	GLint success;
 	glGetProgramiv(m_ID, GL_LINK_STATUS, &success);
@@ -158,9 +158,9 @@ void ShaderProgram::CheckLinkageStatus()
 	}
 }
 
-GLuint ShaderProgram::GetUniformLocation(const std::string& name)
+GLuint ShaderProgram::GetUniformLocation(const std::string& name) const
 {
-	GLint location = glGetUniformLocation(m_ID, name.c_str());
+	auto location = glGetUniformLocation(m_ID, name.c_str());
 
 	if (location == -1)
 	{

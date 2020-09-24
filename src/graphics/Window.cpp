@@ -10,7 +10,7 @@ Window::Window(int width, int height, const std::string& title, bool fullscreen,
 	, m_isFullScreen(fullscreen)
 	, m_vsync(vsync)
 {
-	GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+	auto primaryMonitor = glfwGetPrimaryMonitor();
 	m_window = fullscreen ? glfwCreateWindow(width, height, title.c_str(), primaryMonitor, nullptr)
 						  : glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 
@@ -47,17 +47,17 @@ bool Window::IsClosing() const
 	return static_cast<bool>(glfwWindowShouldClose(m_window));
 }
 
-void Window::SetShouldClose(bool flag)
+void Window::SetShouldClose(bool flag) const
 {
 	glfwSetWindowShouldClose(m_window, flag);
 }
 
-void Window::MakeContextCurrent()
+void Window::MakeContextCurrent() const
 {
 	glfwMakeContextCurrent(m_window);
 }
 
-void Window::SwapBuffers()
+void Window::SwapBuffers() const
 {
 	glfwSwapBuffers(m_window);
 }
@@ -72,12 +72,12 @@ int Window::GetHeight() const
 	return m_height;
 }
 
-void Window::Destroy()
+void Window::Destroy() const
 {
 	glfwDestroyWindow(m_window);
 }
 
-void Window::SetupEventHandlers()
+void Window::SetupEventHandlers() const
 {
 	glfwSetKeyCallback(m_window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
 	{

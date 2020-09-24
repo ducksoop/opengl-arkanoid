@@ -7,7 +7,7 @@ void WindowManager::Initialize()
 	// Setup error handling
 	glfwSetErrorCallback([](int errorCode, const char* description) -> void
 	{
-		throw std::runtime_error(description);
+		std::cerr << description << std::endl;
 	});
 
 	std::cout << glfwGetVersionString() << std::endl;

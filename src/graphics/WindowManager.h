@@ -15,10 +15,5 @@ public:
 	Window* CreateWindow(int w, int h, const std::string& title, bool fullscreen = false, bool vsync = true);
 	
 private:
-	WindowManager() = default;
-	~WindowManager() = default;
-
 	std::vector<std::unique_ptr<Window>> m_windows;
-
-	friend Singleton;
 };

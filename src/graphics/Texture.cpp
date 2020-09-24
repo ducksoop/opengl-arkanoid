@@ -26,7 +26,7 @@ Texture::Texture(GLuint w, GLuint h, unsigned char* image, GLuint format)
 	UnBind();
 }
 
-void Texture::Destroy()
+void Texture::Destroy() const
 {
 	glDeleteTextures(1, &m_ID);
 }

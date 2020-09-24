@@ -52,7 +52,7 @@ std::vector<unsigned char> FileManager::ReadAsBinary(const std::string& path)
 unsigned char* FileManager::ReadImage(const std::string& path, GLint width, GLint height, GLint channels, bool flip)
 {
 	stbi_set_flip_vertically_on_load(flip);
-	unsigned char* image = stbi_load(path.c_str(), &width, &height, &channels, 0);
+	auto image = stbi_load(path.c_str(), &width, &height, &channels, 0);
 	if (image == nullptr)
 	{
 		std::cerr << "Unable to open image file: " << path << std::endl

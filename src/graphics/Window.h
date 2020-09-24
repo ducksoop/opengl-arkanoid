@@ -9,9 +9,9 @@ public:
 	~Window() = default;
 
 	bool IsClosing() const;
-	void SetShouldClose(bool flag);
-	void MakeContextCurrent();
-	void SwapBuffers();
+	void SetShouldClose(bool flag) const;
+	void MakeContextCurrent() const;
+	void SwapBuffers() const;
 
 	int GetWidth() const;
 	int GetHeight() const;
@@ -19,8 +19,8 @@ public:
 private:
 	Window(int width, int height, const std::string& title, bool fullscreen, bool vsync);
 
-	void Destroy();
-	void SetupEventHandlers();
+	void Destroy() const;
+	void SetupEventHandlers() const;
 
 	int m_width;
 	int m_height;

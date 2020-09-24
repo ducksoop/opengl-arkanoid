@@ -87,7 +87,7 @@ void Game::HandleInput(GLfloat dt)
 	}
 	else if (m_gameState == GameState::GameActive)
 	{
-		float velocity = m_player->GetVelocity() * dt;
+		auto velocity = m_player->GetVelocity() * dt;
 
 		if (m_inputManager.IsKeyPressed(GLFW_KEY_A) || m_inputManager.IsKeyPressed(GLFW_KEY_LEFT))
 		{
@@ -287,10 +287,10 @@ void Game::InitializeResources()
 	AssetManager::LoadShaders();
 
 	auto* spriteShader = m_resourceManager.GetShaderProgram("sprite");
-	
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(m_window->GetWidth()),
-	                                  static_cast<GLfloat>(m_window->GetHeight()), 0.0f,
-	                                  -1.0f, 1.0f);
+
+	auto projection = glm::ortho(0.0f, static_cast<GLfloat>(m_window->GetWidth()),
+	                             static_cast<GLfloat>(m_window->GetHeight()), 0.0f,
+	                             -1.0f, 1.0f);
 
 	spriteShader->Use();
 	spriteShader->SetUniform("projection", projection);
@@ -335,9 +335,9 @@ void Game::InitializeResources()
 		arkanoid::ASSETS_OFFSET + "res/levels/4.txt", m_window->GetWidth(), m_window->GetHeight() / 2));
 	m_currentLevel = 0;
 
-	glm::vec2 playerSize = glm::vec2(150, 20) * m_scales;
+	auto playerSize = glm::vec2(150, 20) * m_scales;
 
-	glm::vec2 playerPosition = glm::vec2(
+	auto playerPosition = glm::vec2(
 		m_window->GetWidth() / 2 - playerSize.x / 2,
 		m_window->GetHeight() - playerSize.y
 	);
@@ -350,7 +350,7 @@ void Game::InitializeResources()
 	                                    glm::vec2(0, m_window->GetWidth() - playerSize.x)
 	);
 
-	float ballRadius = BALL_RADIUS * glm::length(m_scales);
+	auto ballRadius = BALL_RADIUS * glm::length(m_scales);
 	m_ball = std::make_unique<Ball>(playerPosition + glm::vec2(playerSize.x / 2 - ballRadius,
 	                                                           -2 * ballRadius),
 	                                ballRadius,
@@ -370,7 +370,7 @@ void Game::CheckCollisions()
 			continue;
 
 		// There was no collision
-		Collision collision = CollisionDetector::CheckCollisionAABB_Circle(*m_ball, *brick);
+		auto collision = CollisionDetector::CheckCollisionAABB_Circle(*m_ball, *brick);
 		if (!std::get<0>(collision))
 			continue;
 
@@ -391,15 +391,15 @@ void Game::CheckCollisions()
 			continue;
 
 		// Collision resolution
-		Direction direction = std::get<1>(collision);
-		glm::vec2 difference = std::get<2>(collision);
+		auto direction = std::get<1>(collision);
+		auto difference = std::get<2>(collision);
 
 		if (direction == Direction::Left || direction == Direction::Right)
 		{
 			m_ball->SetVelocityX(-m_ball->GetVelocity().x);
 
 			// Relocate
-			float penetration = m_ball->GetRadius() - std::abs(difference.x);
+			auto penetration = m_ball->GetRadius() - std::abs(difference.x);
 			if (direction == Direction::Left)
 			{
 				m_ball->UpdatePositionX(penetration); // Move ball to right
@@ -412,7 +412,7 @@ void Game::CheckCollisions()
 		else
 		{
 			m_ball->SetVelocityY(-m_ball->GetVelocity().y);
-			float penetration = m_ball->GetRadius() - std::abs(difference.y);
+			auto penetration = m_ball->GetRadius() - std::abs(difference.y);
 			if (direction == Direction::Up)
 			{
 				m_ball->UpdatePositionY(-penetration);	// Move ball up
@@ -425,19 +425,19 @@ void Game::CheckCollisions()
 	}
 
 	// Check collision with the paddle
-	Collision collision = CollisionDetector::CheckCollisionAABB_Circle(*m_ball, *m_player);
+	auto collision = CollisionDetector::CheckCollisionAABB_Circle(*m_ball, *m_player);
 	if (std::get<0>(collision) && !m_ball->IsStuck())
 	{
 		m_audioManager.PlayAudioSource("bleepPaddle");
 		
 		// Check where it hit the board, and change the velocity based on where it hit
-		float centerBoard = m_player->GetPosition().x + m_player->GetSize().x / 2;
-		float distance = (m_ball->GetPosition().x + m_ball->GetRadius()) - centerBoard;
-		float percentage = distance / (m_player->GetSize().x / 2);
+		auto centerBoard = m_player->GetPosition().x + m_player->GetSize().x / 2;
+		auto distance = (m_ball->GetPosition().x + m_ball->GetRadius()) - centerBoard;
+		auto percentage = distance / (m_player->GetSize().x / 2);
 
 		// Then move accordingly
-		float strength = 2.0f;
-		glm::vec2 oldVelocity = m_ball->GetVelocity();
+		auto strength = 2.0f;
+		auto oldVelocity = m_ball->GetVelocity();
 		m_ball->SetVelocityX(INITIAL_BALL_VELOCITY.x * m_scales.x * percentage * strength);
 		m_ball->SetVelocityY(-1 * std::abs(m_ball->GetVelocity().y));
 		m_ball->SetVelocity(glm::normalize(m_ball->GetVelocity()) * glm::length(oldVelocity));
@@ -464,8 +464,8 @@ void Game::CheckCollisions()
 
 void Game::SpawnPowerups(const Brick& brick)
 {
-	const glm::vec2 size = glm::vec2(60, 20) * m_scales;
-	const glm::vec2 velocity = glm::vec2(0.0f, 150.0f) * m_scales;
+	const auto size = glm::vec2(60, 20) * m_scales;
+	const auto velocity = glm::vec2(0.0f, 150.0f) * m_scales;
 	
 	// Positive powerups (these spawn less frequently)
 	if (Random::Chance(50))

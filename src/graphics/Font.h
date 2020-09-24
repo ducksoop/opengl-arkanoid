@@ -7,7 +7,7 @@
 
 using Font = struct
 {
-    const int SIZE = 40;
+    const float SIZE = 40.0f;
 	const int ATLAS_WIDTH = 2048;
 	const int ATLAS_HEIGHT = 2048;
 	const int OVERSAMPLE_X = 4;

@@ -14,7 +14,7 @@ public:
 private:
 	Texture(GLuint w, GLuint h, unsigned char* image, GLuint format);
 
-	void Destroy();
+	void Destroy() const;
 
 	GLuint m_ID;
 	GLuint m_width;

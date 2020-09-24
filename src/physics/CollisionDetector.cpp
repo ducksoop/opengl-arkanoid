@@ -3,7 +3,7 @@
 Collision CollisionDetector::CheckCollisionAABB_Circle(const Ball& ball, const GameObject& gameObject)
 {
 	// Get center point on circle first
-	glm::vec2 center = ball.GetPosition() + ball.GetRadius();
+	auto center = ball.GetPosition() + ball.GetRadius();
 
 	// Calculate AABB info
 	glm::vec2 aabbHalfExtents(gameObject.GetSize().x / 2, gameObject.GetSize().y / 2);
@@ -13,11 +13,11 @@ Collision CollisionDetector::CheckCollisionAABB_Circle(const Ball& ball, const G
 	);
 
 	// Get difference vector between both centers
-	glm::vec2 difference = center - aabbCenter;
-	glm::vec2 clamped = glm::clamp(difference, -aabbHalfExtents, aabbHalfExtents);
+	auto difference = center - aabbCenter;
+	auto clamped = glm::clamp(difference, -aabbHalfExtents, aabbHalfExtents);
 
 	// Add clamped value to AABB center and we get the value of box closes to circle
-	glm::vec2 closest = aabbCenter + clamped;
+	auto closest = aabbCenter + clamped;
 
 	// Retrieve vector between circle and closest point AABB and check if length is less than or equal to radius
 	difference = closest - center;
@@ -30,11 +30,11 @@ Collision CollisionDetector::CheckCollisionAABB_Circle(const Ball& ball, const G
 bool CollisionDetector::CheckCollisionAABB_AABB(const GameObject& gameObject1, const GameObject& gameObject2)
 {
 	// x-axis
-	bool collisionX = gameObject1.GetPosition().x + gameObject1.GetSize().x >= gameObject2.GetPosition().x &&
+	auto collisionX = gameObject1.GetPosition().x + gameObject1.GetSize().x >= gameObject2.GetPosition().x &&
 					  gameObject2.GetPosition().x + gameObject2.GetSize().x >= gameObject1.GetPosition().x;
 
 	// y-axis
-	bool collisionY = gameObject1.GetPosition().y + gameObject1.GetSize().y >= gameObject2.GetPosition().y &&
+	auto collisionY = gameObject1.GetPosition().y + gameObject1.GetSize().y >= gameObject2.GetPosition().y &&
 					  gameObject2.GetPosition().y + gameObject2.GetSize().y >= gameObject1.GetPosition().y;
 
 	// Collision occurred on both axes
@@ -51,11 +51,11 @@ Direction CollisionDetector::GetVectorDirection(const glm::vec2& target)
 		glm::vec2(1.0f, 0.0f)		// right
 	};
 
-	float max = 0.0f;
-	int bestMatch = -1;
+	auto max = 0.0f;
+	auto bestMatch = -1;
 	for (GLuint i = 0; i < 4; i++)
 	{
-		float dotProduct = glm::dot(glm::normalize(target), compass[i]);
+		auto dotProduct = glm::dot(glm::normalize(target), compass[i]);
 		if (dotProduct > max)
 		{
 			max = dotProduct;

@@ -44,7 +44,7 @@ std::vector<std::unique_ptr<Brick>>& Level::GetBricks()
 	return m_bricks;
 }
 
-std::vector<std::vector<int>> Level::LoadTiles(const std::string& path)
+std::vector<std::vector<int>> Level::LoadTiles(const std::string& path) const
 {
 	std::vector<std::vector<int>> tiles;
 
@@ -68,8 +68,8 @@ std::vector<std::vector<int>> Level::LoadTiles(const std::string& path)
 
 void Level::InitializeLevel(std::vector<std::vector<int>>& tiles, int levelWidth, int levelHeight)
 {
-	float tileWidth = static_cast<float>(levelWidth) / static_cast<float>(tiles[0].size());
-	float tileHeight = static_cast<float>(levelHeight) / static_cast<float>(tiles.size());
+	auto tileWidth = static_cast<float>(levelWidth) / static_cast<float>(tiles[0].size());
+	auto tileHeight = static_cast<float>(levelHeight) / static_cast<float>(tiles.size());
 
 	for (unsigned int i = 0; i < tiles.size(); ++i)
 	{

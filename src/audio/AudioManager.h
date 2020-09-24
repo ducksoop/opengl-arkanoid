@@ -18,13 +18,8 @@ public:
 	void PlayAudioSource(const std::string& name);
 	
 private:
-	AudioManager() = default;
-	~AudioManager() = default;
-	
 	ALCdevice* m_device;
 	ALCcontext* m_context;
 
 	std::map<std::string, std::pair<ALuint, ALuint>> m_sources;
-
-	friend Singleton;
 };

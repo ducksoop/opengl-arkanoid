@@ -12,7 +12,7 @@ class ShaderProgram
 public:
 	~ShaderProgram();
 
-	void Use();
+	void Use() const;
 	void End();
 
 	void SetUniform(const std::string& name, GLboolean value);
@@ -40,8 +40,8 @@ private:
 	ShaderProgram(const Shader& vertexShader, const Shader& fragmentShader);
 
 	void Destroy();
-	void CheckLinkageStatus();
-	GLuint GetUniformLocation(const std::string& name);
+	void CheckLinkageStatus() const;
+	GLuint GetUniformLocation(const std::string& name) const;
 	
 	GLuint m_ID;
 

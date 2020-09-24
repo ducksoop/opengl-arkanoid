@@ -31,7 +31,7 @@ void AudioManager::Close()
 
 void AudioManager::CreateAudioSource(const std::string& name, const std::string& path, bool isLooping)
 {
-	AudioFile audioFile = FileManager::ReadOggFile(path);
+	auto audioFile = FileManager::ReadOggFile(path);
 	ALuint source, buffer;
 
 	alGenSources(1, &source);
@@ -48,6 +48,6 @@ void AudioManager::CreateAudioSource(const std::string& name, const std::string&
 
 void AudioManager::PlayAudioSource(const std::string& name)
 {
-	ALuint source = m_sources[name].first;
+	auto source = m_sources[name].first;
 	alSourcePlay(source);
 }

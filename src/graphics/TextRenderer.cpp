@@ -24,18 +24,18 @@ void TextRenderer::Render(const std::string& text, const glm::vec2& position, co
 	glBindVertexArray(m_VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
 
-	GLfloat x = position.x;
-	int i = 0;
+	auto x = position.x;
+	auto i = 0;
 
 	for (auto c : text) {
 		auto glyph = m_glyphs[c];
 
 		// Update VBO for each character
-		GLfloat width = glyph.size.x * scale;
-		GLfloat height = glyph.size.y * scale;
+		auto width = glyph.size.x * scale;
+		auto height = glyph.size.y * scale;
 
-		GLfloat xPosition = x;
-		GLfloat yPosition = position.y;
+		auto xPosition = x;
+		auto yPosition = position.y;
 
 		GLfloat vertices[] = {
 			xPosition,         yPosition,          glyph.uvs[0].x, glyph.uvs[0].y,
